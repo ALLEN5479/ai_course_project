@@ -1,22 +1,87 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import LoginView from '../views/LoginView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: HomeView,
+      redirect: '/login'
     },
     {
-      path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/AboutView.vue'),
+      path: '/login',
+      name: 'login',
+      component: LoginView,
     },
+    {
+      path: '/student',
+      name: 'student',
+      redirect: '/student/dashboard',
+      children: [
+        {
+          path: 'dashboard',
+          name: 'student-dashboard',
+          component: () => import('../views/student/StudentDashboard.vue'),
+        },
+        {
+          path: 'courses',
+          name: 'student-courses',
+          component: () => import('../views/student/StudentCourses.vue'),
+        },
+        {
+          path: 'knowledge-graph',
+          name: 'student-knowledge-graph',
+          component: () => import('../views/student/KnowledgeGraph.vue'),
+        },
+        {
+          path: 'learning',
+          name: 'student-learning',
+          component: () => import('../views/student/LearningView.vue'),
+        },
+        {
+          path: 'missions',
+          name: 'student-missions',
+          component: () => import('../views/student/MissionView.vue'),
+        },
+        {
+          path: 'ability-map',
+          name: 'student-ability-map',
+          component: () => import('../views/student/AbilityMap.vue'),
+        },
+        {
+          path: 'profile',
+          name: 'student-profile',
+          component: () => import('../views/student/StudentProfile.vue'),
+        },
+        // {
+        //   path: 'self-study',
+        //   name: 'student-self-study',
+        //   component: () => import('../views/student/SelfStudy.vue'),
+        // }
+      ]
+    },
+    {
+      path: '/teacher',
+      name: 'teacher',
+      redirect: '/teacher/dashboard',
+      children: [
+        {
+          path: 'dashboard',
+          name: 'teacher-dashboard',
+          component: () => import('../views/teacher/TeacherDashboard.vue'),
+        },
+        // {
+        //   path: 'courses',
+        //   name: 'teacher-courses',
+        //   component: () => import('../views/teacher/TeacherCourses.vue'),
+        // },
+        // {
+        //   path: 'profile',
+        //   name: 'teacher-profile',
+        //   component: () => import('../views/teacher/TeacherProfile.vue'),
+        // }
+      ]
+    }
   ],
 })
 
