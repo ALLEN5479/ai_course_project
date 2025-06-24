@@ -6,7 +6,7 @@
           <h1>学生端 - 智能课程系统</h1>
           <div class="user-info">
             <el-avatar :size="40" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" />
-            <span class="username">张三</span>
+            <span class="username">{{ studentName }}</span>
             <el-button type="text" @click="logout">退出登录</el-button>
           </div>
         </div>
@@ -67,11 +67,15 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Reading, DataAnalysis, Edit } from '@element-plus/icons-vue'
 
 const router = useRouter()
+const route = useRoute()
+
+// 获取学生真实姓名
+const studentName = ref(route.query.name || '学生')
 
 // 模拟最近课程数据
 const recentCourses = ref([

@@ -145,6 +145,7 @@
 import { ref, reactive } from 'vue'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { useRouter } from 'vue-router'
+import axios from 'axios'
 
 const router = useRouter()
 const activeTab = ref('login')
@@ -211,32 +212,34 @@ const registerRules: FormRules = {
 // 处理登录
 const handleLogin = async () => {
   if (!loginFormRef.value) return
-  
   try {
     await loginFormRef.value.validate()
     loading.value = true
-    
-    // 模拟登录请求
-    setTimeout(() => {
-      // 这里应该调用实际的登录API
-      console.log('登录信息:', loginForm)
-      
-      // 模拟根据用户类型跳转
-      const userType = loginForm.userNumber.startsWith('T') ? 2 : 1 // 简单判断，实际应该从后端获取
-      
-      if (userType === 1) {
-        router.push('/student/dashboard')
-        ElMessage.success('学生登录成功')
-      } else {
-        router.push('/teacher/dashboard')
-        ElMessage.success('教师登录成功')
+    const res = await axios.post('http://localhost:8080/login', null, {
+      params: {
+        user_id: loginForm.userNumber,
+        password: loginForm.password
       }
-      
-      loading.value = false
-    }, 1000)
-    
+    })
+    const user = res.data
+    if (user && user.user_id) {
+      // 登录成功，根据type跳转
+      if (user.type === 1) {
+        ElMessage.success(`欢迎学生 ${user.name} 登录！`)
+        router.push({ path: '/student/dashboard', query: { name: user.name } })
+      } else if (user.type === 2) {
+        ElMessage.success(`欢迎教师 ${user.name} 登录！`)
+        router.push('/teacher/dashboard')
+      } else {
+        ElMessage.success('登录成功')
+        router.push('/')
+      }
+    } else {
+      ElMessage.error('用户名或密码错误')
+    }
   } catch (error) {
-    console.error('登录验证失败:', error)
+    ElMessage.error('登录失败')
+  } finally {
     loading.value = false
   }
 }
@@ -244,32 +247,24 @@ const handleLogin = async () => {
 // 处理注册
 const handleRegister = async () => {
   if (!registerFormRef.value) return
-  
   try {
     await registerFormRef.value.validate()
     loading.value = true
-    
-    // 模拟注册请求
-    setTimeout(() => {
-      // 这里应该调用实际的注册API
-      console.log('注册信息:', registerForm)
-      
+    const res = await axios.post('http://localhost:8080/register', {
+      user_id: registerForm.userNumber,
+      name: registerForm.realName,
+      password: registerForm.password,
+      type: registerForm.userType
+    })
+    if (res.data === true) {
       ElMessage.success('注册成功，请登录')
       activeTab.value = 'login'
-      loading.value = false
-      
-      // 清空注册表单
-      Object.assign(registerForm, {
-        userNumber: '',
-        realName: '',
-        userType: '',
-        password: '',
-        confirmPassword: ''
-      })
-    }, 1000)
-    
+    } else {
+      ElMessage.error('注册失败，用户已存在或信息有误')
+    }
   } catch (error) {
-    console.error('注册验证失败:', error)
+    ElMessage.error('注册失败')
+  } finally {
     loading.value = false
   }
 }
