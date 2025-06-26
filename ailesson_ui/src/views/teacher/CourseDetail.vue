@@ -12,11 +12,11 @@
         <el-tab-pane label="课程简介" name="intro">
           <div>这里是课程简介内容（可后续完善）</div>
         </el-tab-pane>
-        <el-tab-pane label="任务布置" name="assign">
-          <div>这里是任务布置页面（可后续完善）</div>
-        </el-tab-pane>
         <el-tab-pane label="任务管理" name="manage">
-          <div>这里是任务管理页面（可后续完善）</div>
+          <ClassTaskManager :courseId="1" />
+        </el-tab-pane>
+        <el-tab-pane label="任务库管理" name="tasklib">
+          <TaskLibraryManager />
         </el-tab-pane>
       </el-tabs>
     </el-card>
@@ -26,12 +26,15 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-const activeTab = ref('intro');
+import ClassTaskManager from './ClassTaskManager.vue';
+import TaskLibraryManager from './TaskLibraryManager.vue';
+const activeTab = ref('manage'); // 默认显示任务管理tab
 const router = useRouter();
 function goBack() {
   router.back();
 }
 </script>
+
 
 <style scoped>
 .top-bar {

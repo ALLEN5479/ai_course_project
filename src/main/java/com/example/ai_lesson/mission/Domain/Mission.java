@@ -20,7 +20,12 @@ public class Mission {
     private String missionType;
     @JsonProperty("teachingClass")
     private String teachingClass;
-    private Integer completedNumber;  // 来自关联表的统计
+   /*@JsonProperty("completedNumber")
+    private Integer completedNumber;*/
+    @JsonProperty("state")
+    private Integer state;//0未发布 1未批改 2已批改
+    @JsonProperty("teacherId")
+    private Integer teacherId;
 
     public Mission() {}
     public Mission (int missionId, String missionName, String missionDescription, String start_time,  String end_time, String content, String missionType, String teachingClass) {
@@ -95,6 +100,27 @@ public class Mission {
 
     public void setTeachingClass(String teachingClass) {
         this.teachingClass = teachingClass;
+    }
+    /*public Integer getCompletedNumber() {
+        return completedNumber;
+    }*/
+    /*public void setCompletedNumber(Integer completedNumber) {
+        this.completedNumber = completedNumber;
+    }*/
+    public Integer getState() {
+        return state;
+    }
+    public void setState(Integer state) {
+        this.state = state;
+    }
+    public Integer getTeacherId() {
+        return teacherId;
+    }
+    public void setTeacherId(Integer teacherId) {
+        this.teacherId = teacherId;
+    }
+    public static Mission getInstance() {
+        return new Mission();
     }
 
 }
