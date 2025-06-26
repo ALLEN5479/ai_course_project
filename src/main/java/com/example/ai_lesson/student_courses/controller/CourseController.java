@@ -19,4 +19,8 @@ public class CourseController {
         return courseMapper.getCourseById(course_id);
     }
 
+    @RequestMapping("/getTeacherName")
+    public String getTeacherName(String teacher_id) {
+        return courseMapper.getTeacherNameById(teacher_id);
+    }
 }

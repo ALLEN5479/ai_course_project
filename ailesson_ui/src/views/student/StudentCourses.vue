@@ -7,7 +7,7 @@
           <el-button @click="goBack">返回主页</el-button>
         </div>
       </el-header>
-      
+
       <el-main class="main-content">
         <el-row :gutter="20">
           <el-col :span="8" v-for="course in courses" :key="course.id">
@@ -29,10 +29,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router' // 添加 useRoute
 
 const router = useRouter()
+const route = useRoute() // 获取当前路由信息
+
+// 存储从路由中获取的参数
+const routeParams = ref({
+  user_id: route.query.user_id || '',
+  name: route.query.name || ''
+})
 
 const courses = ref([
   {
@@ -58,16 +65,39 @@ const courses = ref([
   }
 ])
 
+// 跳转到课程详情页时保留参数
 const viewCourse = (course: any) => {
-  router.push(`/student/courses/${course.id}`)
+  router.push({
+    path: `/student/courses/${course.id}`,
+    query: {
+      ...routeParams.value // 保留当前所有参数
+    }
+  })
 }
 
+// 返回主页时保留参数
 const goBack = () => {
-  router.push('/student/dashboard')
+  router.push({
+    path: '/student/dashboard',
+    query: {
+      ...routeParams.value // 保留当前所有参数
+    }
+  })
 }
+
+// 监听路由参数变化（可选）
+onMounted(() => {
+  // 如果需要在组件内部更新参数，可以添加监听
+  // 但通常参数在路由跳转时不会变化，这里主要是为了确保初始化
+  routeParams.value = {
+    user_id: route.query.user_id || '',
+    name: route.query.name || ''
+  }
+})
 </script>
 
 <style scoped>
+/* 样式保持不变 */
 .student-courses {
   min-height: 100vh;
   background-color: #f5f7fa;
@@ -131,4 +161,4 @@ const goBack = () => {
   font-size: 12px;
   color: #999;
 }
-</style> 
+</style>
