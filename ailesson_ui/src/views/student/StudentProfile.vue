@@ -25,6 +25,13 @@
               <li>操作系统</li>
             </ul>
           </div>
+          <el-card class="ability-card" @click="goToAbility">
+            <div class="ability-header">
+              <el-icon style="font-size: 32px; color: #409eff;"><i class="el-icon-data-analysis"></i></el-icon>
+              <span style="font-size: 18px; font-weight: bold; margin-left: 10px;">能力图谱</span>
+            </div>
+            <div style="margin-top: 8px; color: #666;">多维度能力评估，点击查看详情</div>
+          </el-card>
         </el-card>
       </el-main>
     </el-container>
@@ -36,6 +43,9 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 const goBack = () => {
   router.push('/student/dashboard')
+}
+const goToAbility = () => {
+  router.push('/student/ability')
 }
 </script>
 
@@ -98,5 +108,17 @@ const goBack = () => {
   color: #333;
   font-size: 15px;
   margin-bottom: 4px;
+}
+.ability-card {
+  margin-top: 24px;
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+.ability-card:hover {
+  box-shadow: 0 4px 16px rgba(64,158,255,0.15);
+}
+.ability-header {
+  display: flex;
+  align-items: center;
 }
 </style> 

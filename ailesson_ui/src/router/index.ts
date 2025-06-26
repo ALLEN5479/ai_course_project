@@ -43,11 +43,11 @@ const router = createRouter({
           name: 'student-missions',
           component: () => import('../views/student/MissionView.vue'),
         },
-        {
-          path: 'ability-map',
-          name: 'student-ability-map',
-          component: () => import('../views/student/AbilityMap.vue'),
-        },
+        // {
+        //   path: 'ability-map',
+        //   name: 'student-ability-map',
+        //   component: () => import('../views/student/AbilityMap.vue'),
+        // },
         {
           path: 'profile',
           name: 'student-profile',
@@ -81,6 +81,17 @@ const router = createRouter({
         //   component: () => import('../views/teacher/TeacherProfile.vue'),
         // }
       ]
+    },
+
+    {
+      path: '/ability/detail',
+      name: 'ability-detail',
+      component: () => import('../views/ability/detail.vue')
+    },
+    {
+      path: '/student/ability',
+      name: 'StudentAbility',
+      component: () => import('@/views/student/ability/index.vue')
     }
   ],
 })
