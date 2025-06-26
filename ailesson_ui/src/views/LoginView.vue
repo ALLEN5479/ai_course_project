@@ -226,7 +226,7 @@ const handleLogin = async () => {
       // 登录成功，根据type跳转
       if (user.type === 1) {
         ElMessage.success(`欢迎学生 ${user.name} 登录！`)
-        router.push({ path: '/student/dashboard', query: { name: user.name } })
+        router.push({ path: '/student/dashboard', query: { name: user.name, user_id: user.user_id } })
       } else if (user.type === 2) {
         ElMessage.success(`欢迎教师 ${user.name} 登录！`)
         router.push('/teacher/dashboard')
