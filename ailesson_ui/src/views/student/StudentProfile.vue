@@ -12,8 +12,8 @@
           <div class="profile-header">
             <el-avatar :size="80" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" />
             <div class="profile-info">
-              <h2>张三</h2>
-              <p>学号：20240001</p>
+              <h2>{{ studentName }}</h2> <!-- 使用路由参数中的姓名 -->
+              <p>学号：{{ studentId }}</p>
               <p>已选课程：3门</p>
             </div>
           </div>
@@ -32,11 +32,44 @@
 </template>
 
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router' // 添加 useRoute
+
 const router = useRouter()
+const route = useRoute() // 获取当前路由信息
+
+// 存储从路由中获取的参数
+const routeParams = ref({
+  user_id: route.query.user_id || '',
+  name: route.query.name || ''
+})
+
+// 学生信息（使用路由参数）
+const studentName = ref(route.query.name || '学生')
+const studentId = ref(route.query.user_id || '未获取学号')
+
+// 返回主页时保留参数
 const goBack = () => {
-  router.push('/student/dashboard')
+  router.push({
+    path: '/student/dashboard',
+    query: {
+      ...routeParams.value // 保留当前所有参数
+    }
+  })
 }
+
+// 监听路由参数变化
+onMounted(() => {
+  // 确保参数更新
+  routeParams.value = {
+    user_id: route.query.user_id || '',
+    name: route.query.name || ''
+  }
+
+  // 更新学生信息
+  studentName.value = route.query.name || '学生'
+  studentId.value = route.query.user_id || '未获取学号'
+})
 </script>
 
 <style scoped>
@@ -99,4 +132,4 @@ const goBack = () => {
   font-size: 15px;
   margin-bottom: 4px;
 }
-</style> 
+</style>
