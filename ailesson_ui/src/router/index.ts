@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import LoginView from '../views/LoginView.vue'
+import QuizVew from "@/views/teacher/QuizVew.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -81,8 +82,13 @@ const router = createRouter({
         //   component: () => import('../views/teacher/TeacherProfile.vue'),
         // }
       ]
-    }
-  ],
+    },
+    {
+      path: '/quiz',
+      name: 'quiz',
+      component: QuizVew,
+    }],
+
 })
 
 export default router
