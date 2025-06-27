@@ -53,6 +53,16 @@ const router = createRouter({
           name: 'student-profile',
           component: () => import('../views/student/StudentProfile.vue'),
         },
+        {
+          path: 'study-resources',
+          name: 'student-study-resources',
+          component: () => import('../views/student/StudyResources.vue'),
+        },
+        {
+          path: 'study-resources/:nodeId',
+          name: 'student-study-resources-with-node',
+          component: () => import('../views/student/StudyResources.vue'),
+        },
         // {
         //   path: 'self-study',
         //   name: 'student-self-study',

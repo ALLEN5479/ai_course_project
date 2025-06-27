@@ -40,6 +40,24 @@
               <p>进行自主答题和学习</p>
             </div>
           </el-card>
+          
+          <!-- 测试学习资源 -->
+          <el-card class="dashboard-card" @click="goToStudyResources(1)">
+            <div class="card-content">
+              <el-icon class="card-icon"><Document /></el-icon>
+              <h3>测试学习资源</h3>
+              <p>测试nodeId=1的学习资源</p>
+            </div>
+          </el-card>
+          
+          <!-- 测试学习资源2 -->
+          <el-card class="dashboard-card" @click="goToStudyResources(2)">
+            <div class="card-content">
+              <el-icon class="card-icon"><Document /></el-icon>
+              <h3>测试学习资源2</h3>
+              <p>测试nodeId=2的学习资源</p>
+            </div>
+          </el-card>
         </div>
         
         <!-- 我的课程展示 -->
@@ -73,7 +91,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
-import { Reading, DataAnalysis, Edit } from '@element-plus/icons-vue'
+import { Reading, DataAnalysis, Edit, Document } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -100,6 +118,7 @@ const goToCourses = () => navigateWithParams('/student/courses')
 const goToProfile = () => navigateWithParams('/student/profile')
 const goToSelfStudy = () => navigateWithParams('/student/self-study')
 const goToCourse = (courseId: number) => navigateWithParams(`/student/courses/${courseId}`)
+const goToStudyResources = (nodeId: number) => navigateWithParams('/student/study-resources', { nodeId })
 
 const logout = () => {
   ElMessage.success('已退出登录')
