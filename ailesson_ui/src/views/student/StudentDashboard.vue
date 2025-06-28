@@ -40,16 +40,34 @@
               <p>进行自主答题和学习</p>
             </div>
           </el-card>
+          
+          <!-- 测试学习资源 -->
+          <el-card class="dashboard-card" @click="goToStudyResources(1)">
+            <div class="card-content">
+              <el-icon class="card-icon"><Document /></el-icon>
+              <h3>测试学习资源</h3>
+              <p>测试nodeId=1的学习资源</p>
+            </div>
+          </el-card>
+          
+          <!-- 测试学习资源2 -->
+          <el-card class="dashboard-card" @click="goToStudyResources(2)">
+            <div class="card-content">
+              <el-icon class="card-icon"><Document /></el-icon>
+              <h3>测试学习资源2</h3>
+              <p>测试nodeId=2的学习资源</p>
+            </div>
+          </el-card>
         </div>
         
-        <!-- 最近课程 -->
+        <!-- 我的课程展示 -->
         <div class="recent-courses">
-          <h2>最近学习的课程</h2>
+          <h2>我的课程</h2>
           <el-row :gutter="20">
-            <el-col :span="8" v-for="course in recentCourses" :key="course.id">
+            <el-col :span="8" v-for="course in courses" :key="course.id">
               <el-card class="course-card" @click="goToCourse(course.id)">
                 <div class="course-info">
-                  <h4>{{ course.name }}</h4>
+                  <h4>{{ course.course_name }}</h4>
                   <p>{{ course.description }}</p>
                   <div class="course-meta">
                     <span>教师: {{ course.teacher }}</span>
@@ -59,6 +77,9 @@
               </el-card>
             </el-col>
           </el-row>
+          <div v-if="courses.length === 0" style="text-align:center;color:#999;margin-top:20px;">
+            暂无课程
+          </div>
         </div>
       </el-main>
     </el-container>
@@ -66,62 +87,95 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import axios from 'axios'
 import { ElMessage } from 'element-plus'
-import { Reading, DataAnalysis, Edit } from '@element-plus/icons-vue'
+import { Reading, DataAnalysis, Edit, Document } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const route = useRoute()
 
 // 获取学生真实姓名
 const studentName = ref(route.query.name || '学生')
+// 获取user_id
+const userId = ref(route.query.user_id || '')
 
-// 模拟最近课程数据
-const recentCourses = ref([
-  {
-    id: 1,
-    name: '数据结构与算法',
-    description: '学习基本的数据结构和算法知识',
-    teacher: '李老师',
-    progress: 75
-  },
-  {
-    id: 2,
-    name: '计算机网络',
-    description: '深入了解网络协议和通信原理',
-    teacher: '王老师',
-    progress: 45
-  },
-  {
-    id: 3,
-    name: '操作系统',
-    description: '学习操作系统的基本概念和原理',
-    teacher: '张老师',
-    progress: 30
-  }
-])
+// 课程数据
+const courses = ref<any[]>([])
 
-const goToCourses = () => {
-  router.push('/student/courses')
+const navigateWithParams = (path: string, additionalParams: Record<string, any> = {}) => {
+  router.push({
+    path,
+    query: {
+      ...route.query, // 保留现有所有查询参数
+      ...additionalParams // 添加额外参数（如有）
+    }
+  })
 }
 
-const goToProfile = () => {
-  router.push('/student/profile')
-}
-
-const goToSelfStudy = () => {
-  router.push('/student/self-study')
-}
-
-const goToCourse = (courseId: number) => {
-  router.push(`/student/courses/${courseId}`)
-}
+const goToCourses = () => navigateWithParams('/student/courses')
+const goToProfile = () => navigateWithParams('/student/profile')
+const goToSelfStudy = () => navigateWithParams('/student/self-study')
+const goToCourse = (courseId: number) => navigateWithParams(`/student/courses/${courseId}`)
+const goToStudyResources = (nodeId: number) => navigateWithParams('/student/study-resources', { nodeId })
 
 const logout = () => {
   ElMessage.success('已退出登录')
   router.push('/login')
 }
+
+// 获取学生课程信息
+const fetchStudentCourses = async () => {
+  if (!userId.value) {
+    ElMessage.error('未获取到用户ID')
+    return
+  }
+  try {
+    // 1. 获取课程列表
+    const { data: courseMsgs } = await axios.get("http://localhost:8080/student/courses", {
+      params: {
+        user_id: userId.value
+      }
+    });
+
+    // 2. 获取每个课程的教师姓名
+    const coursesWithTeachers = await Promise.all(
+        courseMsgs.map(async (course: any) => {
+          console.log(course.teacher_id);
+          try {
+            // 调用获取教师姓名的接口
+            const { data: teacherName } = await axios.get("http://localhost:8080/getTeacherName", {
+              params: {
+                teacher_id: course.teacher_id
+              }
+            });
+            console.log("获取教师姓名成功:", teacherName);
+
+            return {
+              ...course,
+              teacher: teacherName // 添加教师姓名到课程对象
+            };
+          } catch (error) {
+            console.error("获取教师姓名失败:", error);
+            return {
+              ...course,
+              teacher: "未知教师" // 错误时使用默认值
+            };
+          }
+        })
+    );
+
+    courses.value = coursesWithTeachers;
+  } catch (e) {
+    ElMessage.error('获取课程信息失败')
+    courses.value = []
+  }
+}
+
+onMounted(() => {
+  fetchStudentCourses()
+})
 </script>
 
 <style scoped>

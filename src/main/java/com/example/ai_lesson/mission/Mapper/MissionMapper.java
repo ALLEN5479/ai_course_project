@@ -13,13 +13,15 @@ public interface MissionMapper {
     @Select("<script>" +
             "SELECT " +
             "mission_id AS missionId, " +
+            "teacher_id AS teacherId, " +
             "mission_name AS missionName, " +
             "mission_type AS missionType, " +
             "teaching_class AS teachingClass, " +
             "DATE_FORMAT(start_time, '%Y-%m-%d %H:%i:%s') AS start_time, " +
             "DATE_FORMAT(end_time, '%Y-%m-%d %H:%i:%s') AS end_time, " +
-            "content AS content, " +
+            "contents AS contents, " +
             "mission_description AS missionDescription " +
+            "state AS state " +
             "FROM mission " +
             "<where>" +
             "  <if test='missionName != null and missionName != \"\"'> AND mission_name LIKE CONCAT('%', #{missionName}, '%') </if>" +
@@ -50,10 +52,20 @@ public interface MissionMapper {
                          @Param("teachingClass") String teachingClass);
 
     /**
-     * 查询任务详情
+     * 根据任务状态查询任务列表（用于任务界面）
      */
-    @Select("SELECT * FROM mission WHERE mission_id = #{missionId}")
-    Mission selectMissionById(Integer missionId);
+    @Select("<script>" +
+            "SELECT mission_id AS missionId, mission_name AS missionName, " +
+            "mission_type AS missionType, state " +
+            "FROM mission " +
+            "WHERE teacher_id = #{teacherId} " +
+            "<if test='state != null'> AND state = #{state} </if>" +
+            "<if test='missionName != null'> AND mission_name LIKE CONCAT('%', #{missionName}, '%') </if>" +
+            "ORDER BY create_time DESC" +
+            "</script>")
+    List<Mission> selectMissionsByState(@Param("teacherId") Integer teacherId,
+                                        @Param("state") Integer state,
+                                        @Param("missionName") String missionName);
 
     /**
      * 新增任务

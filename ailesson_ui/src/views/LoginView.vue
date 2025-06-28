@@ -226,7 +226,7 @@ const handleLogin = async () => {
       // 登录成功，根据type跳转
       if (user.type === 1) {
         ElMessage.success(`欢迎学生 ${user.name} 登录！`)
-        router.push({ path: '/student/dashboard', query: { name: user.name } })
+        router.push({ path: '/student/dashboard', query: { name: user.name, user_id: user.user_id } })
       } else if (user.type === 2) {
         ElMessage.success(`欢迎教师 ${user.name} 登录！`)
         router.push('/teacher/dashboard')
@@ -276,7 +276,7 @@ const handleRegister = async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #99dada 0%, #61ecdb 100%);
   padding: 20px;
 }
 

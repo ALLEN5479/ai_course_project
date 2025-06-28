@@ -4,9 +4,11 @@ import java.util.List;
 
 public class ClassInfo {
     private int classId;
+    private int teacherId;
     private String className;
     private int totalStudents;
     private List<Mission> missions;
+    private List<Student> students;
     /*@JsonProperty("completedNumber")
     private int completedNumber;
 

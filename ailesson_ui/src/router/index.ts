@@ -54,6 +54,16 @@ const router = createRouter({
           name: 'student-profile',
           component: () => import('../views/student/StudentProfile.vue'),
         },
+        {
+          path: 'study-resources',
+          name: 'student-study-resources',
+          component: () => import('../views/student/StudyResources.vue'),
+        },
+        {
+          path: 'study-resources/:nodeId',
+          name: 'student-study-resources-with-node',
+          component: () => import('../views/student/StudyResources.vue'),
+        },
         // {
         //   path: 'self-study',
         //   name: 'student-self-study',
@@ -71,16 +81,31 @@ const router = createRouter({
           name: 'teacher-dashboard',
           component: () => import('../views/teacher/TeacherDashboard.vue'),
         },
-        // {
-        //   path: 'courses',
-        //   name: 'teacher-courses',
-        //   component: () => import('../views/teacher/TeacherCourses.vue'),
-        // },
-        // {
-        //   path: 'profile',
-        //   name: 'teacher-profile',
-        //   component: () => import('../views/teacher/TeacherProfile.vue'),
-        // }
+        {
+          path: 'courses',
+          name: 'teacher-courses',
+          component: () => import('../views/teacher/CourseBrowser.vue'),
+        },
+        {
+          path: 'courses/:id',
+          name: 'teacher-course-detail',
+          component: () => import('../views/teacher/CourseDetail.vue'),
+        },
+        {
+          path: 'students',
+          name: 'teacher-students',
+          component: () => import('../views/teacher/StudentList.vue'),
+        },
+        {
+          path: 'ability-map/:studentId',
+          name: 'teacher-ability-map',
+          component: () => import('../views/student/AbilityMap.vue'),
+        },
+        {
+          path: 'knowledge-graph',
+          name: 'teacher-knowledge-graph',
+          component: () => import('../views/teacher/KnowledgeGraph.vue'),
+        },
       ]
     },
     {

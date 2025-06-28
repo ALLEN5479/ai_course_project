@@ -1,12 +1,12 @@
 package com.example.ai_lesson.login.entity;
 
 public class LoginEntity {
-    private int user_id;
+    private String user_id;
     private String name;
     private String password;
     private int type;
 
-    public LoginEntity(int user_id, String name, int type, String password) {
+    public LoginEntity(String user_id, String name, int type, String password) {
         this.user_id = user_id;
         this.name = name;
         this.type = type;
@@ -16,11 +16,11 @@ public class LoginEntity {
     public LoginEntity() {
     }
 
-    public int getUser_id() {
+    public String getUser_id() {
         return user_id;
     }
 
-    public void setUser_id(int user_id) {
+    public void setUser_id(String user_id) {
         this.user_id = user_id;
     }
 
