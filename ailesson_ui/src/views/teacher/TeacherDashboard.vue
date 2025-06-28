@@ -198,8 +198,12 @@ const pendingTasks = ref([
 
 // 班级选择相关
 const classDialogVisible = ref(false)
-const selectedCourseClasses = ref([])
-const selectedCourse = ref(null)
+const selectedCourseClasses = ref<Array<{
+  className: string;
+  studentCount: number;
+  status: string;
+}>>([])
+const selectedCourse = ref<any>(null)
 
 const goToCourses = () => {
   router.push('/teacher/courses')
@@ -231,8 +235,16 @@ const enterClass = (classInfo: any) => {
 }
 
 const handleTask = (task: any) => {
-  ElMessage.info(`处理任务: ${task.taskType}`)
-  // 这里可以跳转到具体的任务处理页面
+  if (task.taskType === '批改作业') {
+    // 跳转到课程提交列表页面，传递任务ID
+    router.push({
+      path: '/teacher/course-submission-list',
+      query: { taskId: task.id }
+    });
+  } else {
+    ElMessage.info(`处理任务: ${task.taskType}`);
+    // 这里可以跳转到具体的任务处理页面
+  }
 }
 
 const getPriorityType = (priority: string) => {

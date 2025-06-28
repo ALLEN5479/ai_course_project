@@ -115,6 +115,16 @@ const router = createRouter({
           name: 'class_mission_student',
           component: () => import('../views/teacher/ClassMissionStudent.vue'),
         },
+        {
+          path: 'task-grading',
+          name: 'task-grading',
+          component: () => import('../views/teacher/TaskGrading.vue'),
+        },
+        {
+          path: 'course-submission-list',
+          name: 'course-submission-list',
+          component: () => import('../views/teacher/CourseSubmissionList.vue'),
+        },
       ]
     }
   ],

@@ -24,7 +24,6 @@
               <el-button type="primary" @click="onSearch">搜索</el-button>
               <el-button @click="onReset">重置</el-button>
               <el-button type="success" @click="onCreate">发布任务</el-button>
-              <el-button type="info" @click="onViewCompletion">查看任务完成情况</el-button>
             </el-form-item>
           </el-form>
         </div>

@@ -18,6 +18,9 @@
         <el-tab-pane label="任务库管理" name="tasklib">
           <TaskLibraryManager />
         </el-tab-pane>
+        <el-tab-pane label="构建知识图谱" name="knowledge-graph">
+          <KnowledgeGraphBuilder :courseId="1" />
+        </el-tab-pane>
       </el-tabs>
     </el-card>
   </div>
@@ -28,6 +31,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import ClassTaskManager from './ClassTaskManager.vue';
 import TaskLibraryManager from './TaskLibraryManager.vue';
+import KnowledgeGraphBuilder from './KnowledgeGraphBuilder.vue';
 const activeTab = ref('manage'); // 默认显示任务管理tab
 const router = useRouter();
 function goBack() {
