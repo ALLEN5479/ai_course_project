@@ -95,6 +95,16 @@ const router = createRouter({
           name: 'teacher-knowledge-graph',
           component: () => import('../views/teacher/KnowledgeGraph.vue'),
         },
+        {
+          path: 'test',
+          name: 'test-page',
+          component: () => import('../views/teacher/TestPage.vue'),
+        },
+        {
+          path: 'class-mission-student',
+          name: 'class_mission_student',
+          component: () => import('../views/teacher/ClassMissionStudent.vue'),
+        },
       ]
     }
   ],
