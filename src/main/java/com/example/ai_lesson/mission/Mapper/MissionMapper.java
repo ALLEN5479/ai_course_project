@@ -94,4 +94,6 @@ public interface MissionMapper {
      */
     @Delete("DELETE FROM mission WHERE mission_id = #{missionId}")
     int deleteMissionById(@Param("missionId") Integer missionId);
+
+    Mission selectMissionById(Integer missionId);
 }
