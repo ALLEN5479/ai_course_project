@@ -191,12 +191,14 @@ onMounted(() => {
                   <video :src="selectedResource.resource_url" width="100%" height="600px" controls style="background:#000" />
                 </template>
                 <template v-else-if="selectedResource.res_type === 'word'">
-                  <iframe :src="`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(location.origin + selectedResource.resource_url)}`" width="100%" height="600px" style="border:none;" />
-                  <div style="margin-top:10px;text-align:right"><el-link :href="selectedResource.resource_url" target="_blank">下载Word文档</el-link></div>
+                  <div style="text-align:center;margin-top:20px">
+                    <el-link :href="selectedResource.resource_url" target="_blank">下载Word文档</el-link>
+                  </div>
                 </template>
                 <template v-else-if="selectedResource.res_type === 'ppt'">
-                  <iframe :src="`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(location.origin + selectedResource.resource_url)}`" width="100%" height="600px" style="border:none;" />
-                  <div style="margin-top:10px;text-align:right"><el-link :href="selectedResource.resource_url" target="_blank">下载PPT文件</el-link></div>
+                  <div style="text-align:center;margin-top:20px">
+                    <el-link :href="selectedResource.resource_url" target="_blank">下载PPT文件</el-link>
+                  </div>
                 </template>
                 <template v-else>
                   <el-empty description="暂不支持该类型预览" />

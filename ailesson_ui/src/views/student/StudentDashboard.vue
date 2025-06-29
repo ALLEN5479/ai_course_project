@@ -64,8 +64,8 @@
         <div class="recent-courses">
           <h2>我的课程</h2>
           <el-row :gutter="20">
-            <el-col :span="8" v-for="course in courses" :key="course.id">
-              <el-card class="course-card" @click="goToCourse(course.id)">
+            <el-col :span="8" v-for="course in courses" :key="course.course_id">
+              <el-card class="course-card" @click="goToCourse(course.course_id)">
                 <div class="course-info">
                   <h4>{{ course.course_name }}</h4>
                   <p>{{ course.description }}</p>
@@ -117,7 +117,19 @@ const navigateWithParams = (path: string, additionalParams: Record<string, any> 
 const goToCourses = () => navigateWithParams('/student/courses')
 const goToProfile = () => navigateWithParams('/student/profile')
 const goToSelfStudy = () => navigateWithParams('/student/self-study')
-const goToCourse = (courseId: number) => navigateWithParams(`/student/courses/${courseId}`)
+const goToCourse = (courseId: number) => {
+  const course = courses.value.find(c => c.course_id === courseId)
+  if (course) {
+    navigateWithParams('/student/learning', { 
+      courseId: course.course_id,
+      courseName: course.course_name,
+      courseDescription: course.description,
+      teacherName: course.teacher
+    })
+  } else {
+    navigateWithParams('/student/learning', { courseId })
+  }
+}
 const goToStudyResources = (nodeId: number) => navigateWithParams('/student/study-resources', { nodeId })
 
 const logout = () => {

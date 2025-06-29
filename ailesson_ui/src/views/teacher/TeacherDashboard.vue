@@ -5,8 +5,13 @@
         <div class="header-content">
           <h1>教师端 - 智能课程系统</h1>
           <div class="user-info">
-            <el-avatar :size="40" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" />
-            <span class="username">李老师</span>
+            <el-avatar 
+              :size="40" 
+              src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" 
+              @click="goToProfile"
+              class="clickable-avatar"
+            />
+            <span class="username clickable-username" @click="goToProfile">{{ teacherName }}</span>
             <el-button type="text" @click="logout">退出登录</el-button>
           </div>
         </div>
@@ -60,28 +65,78 @@
           </div>
           
           <el-row :gutter="20">
-            <el-col :span="8" v-for="course in myCourses" :key="course.id">
-              <el-card class="course-card" @click="selectCourse(course)">
+            <el-col :span="8" v-for="course in myCourses" :key="course.course_id">
+              <el-card class="course-card" @click="manageCourse(course)">
                 <div class="course-header">
-                  <h3>{{ course.name }}</h3>
-                  <el-tag :type="course.status === 'active' ? 'success' : 'info'">
-                    {{ course.status === 'active' ? '进行中' : '已结束' }}
-                  </el-tag>
+                  <h3>{{ course.course_name }}</h3>
+                  <el-tag type="success">进行中</el-tag>
                 </div>
-                <p class="course-description">{{ course.description }}</p>
+                <p class="course-description">{{ course.description || '暂无描述' }}</p>
                 <div class="course-stats">
                   <div class="stat-item">
-                    <span class="stat-label">学生数:</span>
-                    <span class="stat-value">{{ course.studentCount }}</span>
+                    <span class="stat-label">课程ID:</span>
+                    <span class="stat-value">{{ course.course_id }}</span>
                   </div>
                   <div class="stat-item">
-                    <span class="stat-label">班级数:</span>
-                    <span class="stat-value">{{ course.classCount }}</span>
+                    <span class="stat-label">教师ID:</span>
+                    <span class="stat-value">{{ course.teacher_id }}</span>
                   </div>
                 </div>
                 <div class="course-actions">
-                  <el-button size="small" @click.stop="viewClasses(course)">查看班级</el-button>
-                  <el-button size="small" type="primary" @click.stop="manageCourse(course)">管理课程</el-button>
+                  <el-button size="small" type="primary">管理课程</el-button>
+                </div>
+              </el-card>
+            </el-col>
+          </el-row>
+          
+          <!-- 加载状态 -->
+          <div v-if="loading" class="loading-container">
+            <el-loading-component />
+          </div>
+          
+          <!-- 空状态 -->
+          <div v-if="!loading && myCourses.length === 0" class="empty-state">
+            <el-empty description="暂无课程数据" />
+          </div>
+        </div>
+
+        <!-- 快速操作 -->
+        <div class="quick-actions-section">
+          <h2>快速操作</h2>
+          <el-row :gutter="20">
+            <el-col :span="6">
+              <el-card class="action-card" @click="goToStudentManagement">
+                <div class="action-content">
+                  <div class="action-icon">👥</div>
+                  <div class="action-title">学生管理</div>
+                  <div class="action-desc">管理学生信息</div>
+                </div>
+              </el-card>
+            </el-col>
+            <el-col :span="6">
+              <el-card class="action-card" @click="goToTaskLibrary">
+                <div class="action-content">
+                  <div class="action-icon">📚</div>
+                  <div class="action-title">任务库</div>
+                  <div class="action-desc">管理教学任务</div>
+                </div>
+              </el-card>
+            </el-col>
+            <el-col :span="6">
+              <el-card class="action-card" @click="goToKnowledgeGraph">
+                <div class="action-content">
+                  <div class="action-icon">🧠</div>
+                  <div class="action-title">知识图谱</div>
+                  <div class="action-desc">查看知识结构</div>
+                </div>
+              </el-card>
+            </el-col>
+            <el-col :span="6">
+              <el-card class="action-card" @click="goToClassTaskManager">
+                <div class="action-content">
+                  <div class="action-icon">📋</div>
+                  <div class="action-title">班级任务</div>
+                  <div class="action-desc">管理班级任务</div>
                 </div>
               </el-card>
             </el-col>
@@ -111,65 +166,93 @@
         </div>
       </el-main>
     </el-container>
-
-    <!-- 班级选择对话框 -->
-    <el-dialog v-model="classDialogVisible" title="选择教学班" width="600px">
-      <el-table :data="selectedCourseClasses" style="width: 100%">
-        <el-table-column prop="className" label="班级名称" />
-        <el-table-column prop="studentCount" label="学生数量" />
-        <el-table-column prop="status" label="状态" />
-        <el-table-column label="操作">
-          <template #default="scope">
-            <el-button size="small" @click="enterClass(scope.row)">进入班级</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import axios from 'axios'
 
 const router = useRouter()
+const route = useRoute()
+
+// 教师信息
+const teacherId = ref('')
+const teacherName = ref('李老师') // 默认值
+
+// 加载状态
+const loading = ref(false)
+
+// 获取路由参数中的教师信息
+const getTeacherInfo = () => {
+  const id = route.query.teacherId as string
+  const name = route.query.teacherName as string
+  
+  if (id) {
+    teacherId.value = id
+  }
+  
+  if (name) {
+    teacherName.value = name
+  }
+}
 
 // 统计数据
 const stats = ref({
-  totalCourses: 5,
+  totalCourses: 0,
   totalStudents: 156,
   pendingTasks: 8,
   activeClasses: 12
 })
 
 // 我的课程
-const myCourses = ref([
-  {
-    id: 1,
-    name: '数据结构与算法',
-    description: '学习基本的数据结构和算法知识，包括数组、链表、栈、队列、树、图等',
-    status: 'active',
-    studentCount: 45,
-    classCount: 3
-  },
-  {
-    id: 2,
-    name: '计算机网络',
-    description: '深入了解网络协议和通信原理，掌握网络编程基础',
-    status: 'active',
-    studentCount: 38,
-    classCount: 2
-  },
-  {
-    id: 3,
-    name: '操作系统',
-    description: '学习操作系统的基本概念和原理，进程管理、内存管理等',
-    status: 'active',
-    studentCount: 42,
-    classCount: 2
+const myCourses = ref([])
+
+// 获取教师课程数据
+const fetchTeacherCourses = async () => {
+  if (!teacherId.value) {
+    ElMessage.warning('教师ID不存在，无法获取课程数据')
+    return
   }
-])
+
+  loading.value = true
+  try {
+    // 调用getCoursesByTeacherId接口获取课程数据
+    const { data: courses } = await axios.get("http://localhost:8080/getCoursesByTeacherId", {
+      params: {
+        teacher_id: teacherId.value
+      }
+    })
+    
+    myCourses.value = courses || []
+    stats.value.totalCourses = courses ? courses.length : 0
+    
+    // 如果教师姓名为默认值，尝试从API获取
+    if (teacherName.value === '李老师') {
+      try {
+        const { data: name } = await axios.get("http://localhost:8080/getTeacherName", {
+          params: {
+            teacher_id: teacherId.value
+          }
+        })
+        if (name) {
+          teacherName.value = name
+        }
+      } catch (error) {
+        console.error('获取教师姓名失败:', error)
+      }
+    }
+    
+    ElMessage.success('课程数据加载成功')
+  } catch (error) {
+    console.error('获取课程数据失败:', error)
+    ElMessage.error('获取课程数据失败，请检查网络连接')
+  } finally {
+    loading.value = false
+  }
+}
 
 // 待处理任务
 const pendingTasks = ref([
@@ -196,38 +279,24 @@ const pendingTasks = ref([
   }
 ])
 
-// 班级选择相关
-const classDialogVisible = ref(false)
-const selectedCourseClasses = ref([])
-const selectedCourse = ref(null)
-
 const goToCourses = () => {
-  router.push('/teacher/courses')
-}
-
-const selectCourse = (course: any) => {
-  selectedCourse.value = course
-  // 模拟获取班级数据
-  selectedCourseClasses.value = [
-    { className: `${course.name}-1班`, studentCount: 15, status: '活跃' },
-    { className: `${course.name}-2班`, studentCount: 16, status: '活跃' },
-    { className: `${course.name}-3班`, studentCount: 14, status: '活跃' }
-  ]
-  classDialogVisible.value = true
-}
-
-const viewClasses = (course: any) => {
-  selectCourse(course)
+  router.push({
+    path: '/teacher/courses',
+    query: {
+      teacherId: teacherId.value,
+      teacherName: teacherName.value
+    }
+  })
 }
 
 const manageCourse = (course: any) => {
-  router.push(`/teacher/courses/${course.id}`)
-}
-
-const enterClass = (classInfo: any) => {
-  ElMessage.success(`进入班级: ${classInfo.className}`)
-  classDialogVisible.value = false
-  // 这里可以跳转到具体的班级管理页面
+  router.push({
+    path: `/teacher/courses/${course.course_id}`,
+    query: {
+      teacherId: teacherId.value,
+      teacherName: teacherName.value
+    }
+  })
 }
 
 const handleTask = (task: any) => {
@@ -248,6 +317,45 @@ const logout = () => {
   ElMessage.success('已退出登录')
   router.push('/login')
 }
+
+const goToProfile = () => {
+  router.push({
+    path: '/teacher/profile',
+    query: {
+      teacher_id: teacherId.value,
+      name: teacherName.value
+    }
+  })
+}
+
+const goToStudentManagement = () => {
+  const { teacher_id, ...rest } = route.query;
+  router.push({
+    path: '/teacher/student-management',
+    query: {
+      ...rest,
+      teacherName: teacherName.value
+    }
+  })
+}
+
+const goToTaskLibrary = () => {
+  router.push('/teacher/task-library')
+}
+
+const goToKnowledgeGraph = () => {
+  router.push('/teacher/knowledge-graph')
+}
+
+const goToClassTaskManager = () => {
+  router.push('/teacher/class-task-manager')
+}
+
+// 组件挂载时获取教师信息和课程数据
+onMounted(() => {
+  getTeacherInfo()
+  fetchTeacherCourses()
+})
 </script>
 
 <style scoped>
@@ -285,6 +393,24 @@ const logout = () => {
 .username {
   font-weight: 500;
   color: #333;
+}
+
+.clickable-avatar {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.clickable-avatar:hover {
+  transform: scale(1.05);
+}
+
+.clickable-username {
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.clickable-username:hover {
+  color: #409eff;
 }
 
 .main-content {
@@ -405,5 +531,49 @@ const logout = () => {
   margin-bottom: 20px;
   color: #333;
   font-size: 20px;
+}
+
+.quick-actions-section {
+  margin-bottom: 40px;
+}
+
+.quick-actions-section h2 {
+  margin-bottom: 20px;
+  color: #333;
+  font-size: 20px;
+}
+
+.action-card {
+  text-align: center;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.action-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.action-content {
+  padding: 20px;
+}
+
+.action-icon {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.action-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.action-desc {
+  font-size: 12px;
+  color: #666;
 }
 </style> 

@@ -40,6 +40,11 @@ const router = createRouter({
           component: () => import('../views/student/LearningView.vue'),
         },
         {
+          path: 'learning/:courseId',
+          name: 'student-learning-with-course',
+          component: () => import('../views/student/LearningView.vue'),
+        },
+        {
           path: 'missions',
           name: 'student-missions',
           component: () => import('../views/student/MissionView.vue'),
@@ -106,15 +111,35 @@ const router = createRouter({
           name: 'teacher-knowledge-graph',
           component: () => import('../views/teacher/KnowledgeGraph.vue'),
         },
+        // {
+        //   path: 'test',
+        //   name: 'test-page',
+        //   component: () => import('../views/teacher/TestPage.vue'),
+        // },
+        // {
+        //   path: 'class-mission-student',
+        //   name: 'class_mission_student',
+        //   component: () => import('../views/teacher/ClassMissionStudent.vue'),
+        // },
         {
-          path: 'test',
-          name: 'test-page',
-          component: () => import('../views/teacher/TestPage.vue'),
+          path: 'profile',
+          name: 'teacher-profile',
+          component: () => import('../views/teacher/TeacherProfile.vue'),
         },
         {
-          path: 'class-mission-student',
-          name: 'class_mission_student',
-          component: () => import('../views/teacher/ClassMissionStudent.vue'),
+          path: 'student-management',
+          name: 'teacher-student-management',
+          component: () => import('../views/teacher/StudentManagement.vue'),
+        },
+        {
+          path: 'task-library',
+          name: 'teacher-task-library',
+          component: () => import('../views/teacher/TaskLibraryManager.vue'),
+        },
+        {
+          path: 'class-task-manager',
+          name: 'teacher-class-task-manager',
+          component: () => import('../views/teacher/ClassTaskManager.vue'),
         },
       ]
     },

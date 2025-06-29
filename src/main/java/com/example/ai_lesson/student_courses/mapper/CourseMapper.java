@@ -1,6 +1,8 @@
 package com.example.ai_lesson.student_courses.mapper;
 
+import com.example.ai_lesson.login.entity.LoginEntity;
 import com.example.ai_lesson.student_courses.entity.CourseEntity;
+import com.example.ai_lesson.student_courses.entity.ManagementEntity;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,4 +29,7 @@ public interface CourseMapper {
 
     @Select("select name from user_msg where user_id=#{teacher_id}")
     String getTeacherNameById(@Param("teacher_id") String teacher_id);
+
+    @Select("select * from course where teacher_id=#{teacher_id}")
+    List<CourseEntity> getCoursesByTeacherId(@Param("teacher_id") String teacher_id);
 }

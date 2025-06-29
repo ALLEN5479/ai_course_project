@@ -229,7 +229,13 @@ const handleLogin = async () => {
         router.push({ path: '/student/dashboard', query: { name: user.name, user_id: user.user_id } })
       } else if (user.type === 2) {
         ElMessage.success(`欢迎教师 ${user.name} 登录！`)
-        router.push('/teacher/dashboard')
+        router.push({ 
+          path: '/teacher/dashboard', 
+          query: { 
+            teacherId: user.user_id, 
+            teacherName: user.name 
+          } 
+        })
       } else {
         ElMessage.success('登录成功')
         router.push('/')

@@ -100,9 +100,13 @@ const fetchCourses = async () => {
 // 跳转到课程详情页时保留参数
 const viewCourse = (course: any) => {
   router.push({
-    path: `/student/courses/${course.id}`,
+    path: '/student/learning',
     query: {
-      ...routeParams.value
+      ...routeParams.value,
+      courseId: course.id,
+      courseName: course.name,
+      courseDescription: course.description,
+      teacherName: course.teacher
     }
   })
 }
