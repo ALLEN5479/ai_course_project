@@ -10,25 +10,25 @@ public class QuizQuestion {
 
     @JsonProperty("id")
     private Integer id;
-    @JsonProperty("questionText")
-    private String questionText;
-    @JsonProperty("optionA")
-    private String optionA;
-    @JsonProperty("optionB")
-    private String optionB;
-    @JsonProperty("optionC")
-    private String optionC;
-    @JsonProperty("optionD")
-    private String optionD;
-    @JsonProperty("correctAnswer")
-    private String correctAnswer;
+    @JsonProperty("question_text")
+    private String question_text;
+    @JsonProperty("option_a")
+    private String option_a;
+    @JsonProperty("option_b")
+    private String option_b;
+    @JsonProperty("option_c")
+    private String option_c;
+    @JsonProperty("option_d")
+    private String option_d;
+    @JsonProperty("correct_answer")
+    private String correct_answer;
     @JsonProperty("category")
     private String category;
     @JsonProperty("difficulty")
     private String difficulty;
-    @JsonProperty("createdAt")
+    @JsonProperty("created_at")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private Date createdAt;
+    private Date created_at;
 
     public Integer getId() {
         return id;
@@ -38,52 +38,52 @@ public class QuizQuestion {
         this.id = id;
     }
 
-    public String getQuestionText() {
-        return questionText;
+    public String getQuestion_text() {
+        return question_text;
     }
 
-    public void setQuestionText(String questionText) {
-        this.questionText = questionText;
+    public void setQuestion_text(String question_text) {
+        this.question_text = question_text;
     }
 
-    public String getOptionA() {
-        return optionA;
+    public String getOption_a() {
+        return option_a;
     }
 
-    public void setOptionA(String optionA) {
-        this.optionA = optionA;
+    public void setOption_a(String option_a) {
+        this.option_a = option_a;
     }
 
-    public String getOptionB() {
-        return optionB;
+    public String getOption_b() {
+        return option_b;
     }
 
-    public void setOptionB(String optionB) {
-        this.optionB = optionB;
+    public void setOption_b(String option_b) {
+        this.option_b = option_b;
     }
 
-    public String getOptionC() {
-        return optionC;
+    public String getOption_c() {
+        return option_c;
     }
 
-    public void setOptionC(String optionC) {
-        this.optionC = optionC;
+    public void setOption_c(String option_c) {
+        this.option_c = option_c;
     }
 
-    public String getOptionD() {
-        return optionD;
+    public String getOption_d() {
+        return option_d;
     }
 
-    public void setOptionD(String optionD) {
-        this.optionD = optionD;
+    public void setOption_d(String option_d) {
+        this.option_d = option_d;
     }
 
-    public String getCorrectAnswer() {
-        return correctAnswer;
+    public String getCorrect_answer() {
+        return correct_answer;
     }
 
-    public void setCorrectAnswer(String correctAnswer) {
-        this.correctAnswer = correctAnswer;
+    public void setCorrect_answer(String correct_answer) {
+        this.correct_answer = correct_answer;
     }
 
     public String getCategory() {
@@ -102,12 +102,11 @@ public class QuizQuestion {
         this.difficulty = difficulty;
     }
 
-    public Date getCreatedAt() {
-        return createdAt;
+    public Date getCreated_at() {
+        return created_at;
     }
 
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
+    public void setCreated_at(Date created_at) {
+        this.created_at = created_at;
     }
-
 }

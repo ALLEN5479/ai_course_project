@@ -32,18 +32,24 @@ public class QuizService {
 
     // 生成多个问题
     public List<QuizQuestion> generateQuestions(int count, String difficulty, String requirement) throws IOException {
-        // 构建提示词以引导AI生成符合格式的选择题
+        // 构建更明确的提示词以引导AI生成符合格式的选择题
         String prompt = String.format(
-                "请生成%d道关于编程的%s难度选择题，包含4个选项(A-D)和正确答案。" +
-                        "请使用以下格式回答：\n\n" +
-                        "问题：[问题文本]\n" +
-                        "选项：\n" +
-                        "A. [选项A文本]\n" +
-                        "B. [选项B文本]\n" +
-                        "C. [选项C文本]\n" +
-                        "D. [选项D文本]\n" +
-                        "正确答案：[A/B/C/D] \n" +
-                        "额外要求：%s",
+                "请生成%d道关于编程的%s难度选择题。额外要求：%s(如额外要求后没写信息则没有额外要求)。每道题必须严格按照以下格式输出：\n\n" +
+                "题目1：\n" +
+                "问题：[具体问题内容]\n" +
+                "A. [选项A内容]\n" +
+                "B. [选项B内容]\n" +
+                "C. [选项C内容]\n" +
+                "D. [选项D内容]\n" +
+                "正确答案：[A/B/C/D]\n\n" +
+                "题目2：\n" +
+                "问题：[具体问题内容]\n" +
+                "A. [选项A内容]\n" +
+                "B. [选项B内容]\n" +
+                "C. [选项C内容]\n" +
+                "D. [选项D内容]\n" +
+                "正确答案：[A/B/C/D]\n\n" +
+                "请确保每道题都有完整的问题、4个选项和正确答案。",
                 count, difficulty, requirement
         );
 
@@ -64,17 +70,39 @@ public class QuizService {
     private List<QuizQuestion> parseMultipleQuestions(String answer, int expectedCount, String difficulty) {
         List<QuizQuestion> questions = new ArrayList<>();
 
-        // 定义问题分隔模式
-        Pattern questionSeparator = Pattern.compile("问题：(.+?)(?=问题：|$)", Pattern.DOTALL);
-        Matcher matcher = questionSeparator.matcher(answer);
+        // 首先尝试解析你提到的具体格式
+        questions = parseSpecificFormat(answer, difficulty);
 
-        while (matcher.find()) {
-            String questionText = "问题：" + matcher.group(1);
-            QuizQuestion question = parseSingleQuestion(questionText);
-            if (question != null) {
-                question.setDifficulty(difficulty);
-                question.setCategory("编程");
-                questions.add(question);
+        // 如果解析失败，尝试其他格式
+        if (questions.isEmpty()) {
+            // 尝试按"题目X："分割
+            Pattern questionBlockPattern = Pattern.compile("题目\\d+：\\s*\\n(.*?)(?=题目\\d+：|$)", Pattern.DOTALL);
+            Matcher blockMatcher = questionBlockPattern.matcher(answer);
+
+            while (blockMatcher.find()) {
+                String questionBlock = blockMatcher.group(1);
+                QuizQuestion question = parseSingleQuestion(questionBlock);
+                if (question != null && isValidQuestion(question)) {
+                    question.setDifficulty(difficulty);
+                    question.setCategory("编程");
+                    questions.add(question);
+                }
+            }
+        }
+
+        // 如果还是没有找到，尝试按数字编号分割
+        if (questions.isEmpty()) {
+            Pattern numberedPattern = Pattern.compile("\\d+\\..*?(?=\\d+\\.|$)", Pattern.DOTALL);
+            Matcher numberedMatcher = numberedPattern.matcher(answer);
+            
+            while (numberedMatcher.find()) {
+                String questionBlock = numberedMatcher.group(0);
+                QuizQuestion question = parseSingleQuestion(questionBlock);
+                if (question != null && isValidQuestion(question)) {
+                    question.setDifficulty(difficulty);
+                    question.setCategory("编程");
+                    questions.add(question);
+                }
             }
         }
 
@@ -89,60 +117,173 @@ public class QuizService {
         return questions;
     }
 
+    // 解析你提到的具体格式
+    private List<QuizQuestion> parseSpecificFormat(String answer, String difficulty) {
+        List<QuizQuestion> questions = new ArrayList<>();
+        
+        try {
+            // 提取问题部分
+            String questionPart = "";
+            if (answer.contains("问题：[问题文本]")) {
+                int start = answer.indexOf("问题：[问题文本]");
+                int end = answer.indexOf("A:");
+                if (end == -1) end = answer.length();
+                questionPart = answer.substring(start, end);
+            }
+            
+            // 提取选项部分
+            String optionsPart = "";
+            if (answer.contains("A:") && answer.contains("B:") && answer.contains("C:") && answer.contains("D:")) {
+                int start = answer.indexOf("A:");
+                int end = answer.indexOf("正确答案：");
+                if (end == -1) end = answer.length();
+                optionsPart = answer.substring(start, end);
+            }
+            
+            // 提取答案部分
+            String answerPart = "";
+            if (answer.contains("正确答案：")) {
+                int start = answer.indexOf("正确答案：");
+                answerPart = answer.substring(start);
+            }
+            
+            // 解析问题
+            List<String> questionTexts = new ArrayList<>();
+            Pattern questionPattern = Pattern.compile("\\d+\\..*?(?=\\d+\\.|A:|$)", Pattern.DOTALL);
+            Matcher questionMatcher = questionPattern.matcher(questionPart);
+            while (questionMatcher.find()) {
+                String questionText = questionMatcher.group(0).replaceAll("^\\d+\\.\\s*", "").trim();
+                if (!questionText.isEmpty()) {
+                    questionTexts.add(questionText);
+                }
+            }
+            
+            // 解析选项
+            String optionA = "", optionB = "", optionC = "", optionD = "";
+            Pattern optionPattern = Pattern.compile("([A-D]):\\s*(.+?)(?=\\s*[A-D]:|正确答案|$)", Pattern.DOTALL);
+            Matcher optionMatcher = optionPattern.matcher(optionsPart);
+            while (optionMatcher.find()) {
+                String option = optionMatcher.group(1);
+                String content = optionMatcher.group(2).trim();
+                switch (option) {
+                    case "A": optionA = content; break;
+                    case "B": optionB = content; break;
+                    case "C": optionC = content; break;
+                    case "D": optionD = content; break;
+                }
+            }
+            
+            // 解析正确答案
+            List<String> correctAnswers = new ArrayList<>();
+            Pattern correctPattern = Pattern.compile("\\d+\\.\\s*([A-D])");
+            Matcher correctMatcher = correctPattern.matcher(answerPart);
+            while (correctMatcher.find()) {
+                correctAnswers.add(correctMatcher.group(1));
+            }
+            
+            // 创建问题对象
+            for (int i = 0; i < questionTexts.size(); i++) {
+                QuizQuestion question = new QuizQuestion();
+                question.setQuestion_text(questionTexts.get(i));
+                question.setOption_a(optionA);
+                question.setOption_b(optionB);
+                question.setOption_c(optionC);
+                question.setOption_d(optionD);
+                
+                // 设置正确答案
+                if (i < correctAnswers.size()) {
+                    question.setCorrect_answer(correctAnswers.get(i));
+                } else {
+                    question.setCorrect_answer("A"); // 默认答案
+                }
+                
+                question.setDifficulty(difficulty);
+                question.setCategory("编程");
+                
+                if (isValidQuestion(question)) {
+                    questions.add(question);
+                }
+            }
+            
+        } catch (Exception e) {
+            System.err.println("解析特定格式时出错: " + e.getMessage());
+        }
+        
+        return questions;
+    }
+
     // 解析单个问题
     private QuizQuestion parseSingleQuestion(String questionText) {
         QuizQuestion question = new QuizQuestion();
 
-        // 使用正则表达式提取问题、选项和答案
-        Pattern questionPattern = Pattern.compile("问题：(.+?)(?=选项：|$)", Pattern.DOTALL);
-        Pattern optionAPattern = Pattern.compile("A\\.\\s+(.+?)(?=B\\.|$)", Pattern.DOTALL);
-        Pattern optionBPattern = Pattern.compile("B\\.\\s+(.+?)(?=C\\.|$)", Pattern.DOTALL);
-        Pattern optionCPattern = Pattern.compile("C\\.\\s+(.+?)(?=D\\.|$)", Pattern.DOTALL);
-        Pattern optionDPattern = Pattern.compile("D\\.\\s+(.+?)(?=正确答案|$)", Pattern.DOTALL);
-        Pattern answerPattern = Pattern.compile("正确答案：\\s*([A-D])", Pattern.DOTALL);
+        // 清理文本，移除多余的空白字符
+        questionText = questionText.trim();
 
+        // 提取问题内容 - 支持多种格式
+        Pattern questionPattern = Pattern.compile("问题：\\s*(.+?)(?=\\s*A\\.|\\s*选项|$)", Pattern.DOTALL);
         Matcher questionMatcher = questionPattern.matcher(questionText);
         if (questionMatcher.find()) {
-            question.setQuestionText(questionMatcher.group(1).trim());
+            String questionContent = questionMatcher.group(1).trim();
+            // 移除可能的编号
+            questionContent = questionContent.replaceAll("^\\d+\\.\\s*", "");
+            question.setQuestion_text(questionContent);
         }
+
+        // 提取选项 - 支持多种格式
+        Pattern optionAPattern = Pattern.compile("A\\.\\s*(.+?)(?=\\s*B\\.|\\s*正确答案|$)", Pattern.DOTALL);
+        Pattern optionBPattern = Pattern.compile("B\\.\\s*(.+?)(?=\\s*C\\.|\\s*正确答案|$)", Pattern.DOTALL);
+        Pattern optionCPattern = Pattern.compile("C\\.\\s*(.+?)(?=\\s*D\\.|\\s*正确答案|$)", Pattern.DOTALL);
+        Pattern optionDPattern = Pattern.compile("D\\.\\s*(.+?)(?=\\s*正确答案|$)", Pattern.DOTALL);
 
         Matcher optionAMatcher = optionAPattern.matcher(questionText);
         if (optionAMatcher.find()) {
-            question.setOptionA(optionAMatcher.group(1).trim());
+            question.setOption_a(optionAMatcher.group(1).trim());
         }
 
         Matcher optionBMatcher = optionBPattern.matcher(questionText);
         if (optionBMatcher.find()) {
-            question.setOptionB(optionBMatcher.group(1).trim());
+            question.setOption_b(optionBMatcher.group(1).trim());
         }
 
         Matcher optionCMatcher = optionCPattern.matcher(questionText);
         if (optionCMatcher.find()) {
-            question.setOptionC(optionCMatcher.group(1).trim());
+            question.setOption_c(optionCMatcher.group(1).trim());
         }
 
         Matcher optionDMatcher = optionDPattern.matcher(questionText);
         if (optionDMatcher.find()) {
-            question.setOptionD(optionDMatcher.group(1).trim());
+            question.setOption_d(optionDMatcher.group(1).trim());
         }
 
+        // 提取正确答案 - 支持多种格式
+        Pattern answerPattern = Pattern.compile("正确答案：\\s*([A-D])", Pattern.DOTALL);
         Matcher answerMatcher = answerPattern.matcher(questionText);
         if (answerMatcher.find()) {
-            question.setCorrectAnswer(answerMatcher.group(1).trim());
+            question.setCorrect_answer(answerMatcher.group(1).trim());
         }
 
         return question;
     }
 
+    // 验证问题是否有效
+    private boolean isValidQuestion(QuizQuestion question) {
+        return question.getQuestion_text() != null && !question.getQuestion_text().trim().isEmpty() &&
+               question.getOption_a() != null && !question.getOption_a().trim().isEmpty() &&
+               question.getOption_b() != null && !question.getOption_b().trim().isEmpty() &&
+               question.getOption_c() != null && !question.getOption_c().trim().isEmpty() &&
+               question.getOption_d() != null && !question.getOption_d().trim().isEmpty() &&
+               question.getCorrect_answer() != null && !question.getCorrect_answer().trim().isEmpty();
+    }
+
     // 创建默认问题（当AI未能生成足够问题时使用）
     private QuizQuestion createDefaultQuestion(String difficulty) {
         QuizQuestion question = new QuizQuestion();
-        question.setQuestionText("默认问题（AI未能生成足够问题）");
-        question.setOptionA("选项A");
-        question.setOptionB("选项B");
-        question.setOptionC("选项C");
-        question.setOptionD("选项D");
-        question.setCorrectAnswer("A");
+        question.setQuestion_text("默认问题（AI未能生成足够问题）");
+        question.setOption_a("选项A");
+        question.setOption_b("选项B");
+        question.setOption_c("选项C");
+        question.setOption_d("选项D");
+        question.setCorrect_answer("A");
         question.setDifficulty(difficulty);
         question.setCategory("编程");
         return question;
@@ -181,12 +322,12 @@ public class QuizService {
     public Optional<QuizQuestion> updateQuestion(Integer id, QuizQuestion questionDetails) {
         return getQuestionById(id)
                 .map(existingQuestion -> {
-                    existingQuestion.setQuestionText(questionDetails.getQuestionText());
-                    existingQuestion.setOptionA(questionDetails.getOptionA());
-                    existingQuestion.setOptionB(questionDetails.getOptionB());
-                    existingQuestion.setOptionC(questionDetails.getOptionC());
-                    existingQuestion.setOptionD(questionDetails.getOptionD());
-                    existingQuestion.setCorrectAnswer(questionDetails.getCorrectAnswer());
+                    existingQuestion.setQuestion_text(questionDetails.getQuestion_text());
+                    existingQuestion.setOption_a(questionDetails.getOption_a());
+                    existingQuestion.setOption_b(questionDetails.getOption_b());
+                    existingQuestion.setOption_c(questionDetails.getOption_c());
+                    existingQuestion.setOption_d(questionDetails.getOption_d());
+                    existingQuestion.setCorrect_answer(questionDetails.getCorrect_answer());
                     existingQuestion.setDifficulty(questionDetails.getDifficulty());
                     existingQuestion.setCategory(questionDetails.getCategory());
                     questionMapper.update(existingQuestion);

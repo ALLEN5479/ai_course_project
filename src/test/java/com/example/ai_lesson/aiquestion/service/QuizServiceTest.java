@@ -45,25 +45,25 @@ class QuizServiceTest {
         
         QuizQuestion question = questions.get(0);
         assertNotNull(question);
-        assertNotNull(question.getQuestionText());
-        assertNotNull(question.getOptionA());
-        assertNotNull(question.getOptionB());
-        assertNotNull(question.getOptionC());
-        assertNotNull(question.getOptionD());
-        assertNotNull(question.getCorrectAnswer());
+        assertNotNull(question.getQuestion_text());
+        assertNotNull(question.getOption_a());
+        assertNotNull(question.getOption_b());
+        assertNotNull(question.getOption_c());
+        assertNotNull(question.getOption_d());
+        assertNotNull(question.getCorrect_answer());
         assertEquals("简单", question.getDifficulty());
         assertEquals("编程", question.getCategory());
         
         // 验证答案格式
-        assertTrue(question.getCorrectAnswer().matches("[A-D]"));
+        assertTrue(question.getCorrect_answer().matches("[A-D]"));
         
         System.out.println("生成的题目:");
-        System.out.println("问题: " + question.getQuestionText());
-        System.out.println("A: " + question.getOptionA());
-        System.out.println("B: " + question.getOptionB());
-        System.out.println("C: " + question.getOptionC());
-        System.out.println("D: " + question.getOptionD());
-        System.out.println("正确答案: " + question.getCorrectAnswer());
+        System.out.println("问题: " + question.getQuestion_text());
+        System.out.println("A: " + question.getOption_a());
+        System.out.println("B: " + question.getOption_b());
+        System.out.println("C: " + question.getOption_c());
+        System.out.println("D: " + question.getOption_d());
+        System.out.println("正确答案: " + question.getCorrect_answer());
     }
 
     @Test
@@ -78,13 +78,13 @@ class QuizServiceTest {
         for (int i = 0; i < questions.size(); i++) {
             QuizQuestion question = questions.get(i);
             assertNotNull(question);
-            assertNotNull(question.getQuestionText());
+            assertNotNull(question.getQuestion_text());
             assertEquals("中等", question.getDifficulty());
             assertEquals("编程", question.getCategory());
             
             System.out.println("题目 " + (i + 1) + ":");
-            System.out.println("问题: " + question.getQuestionText());
-            System.out.println("正确答案: " + question.getCorrectAnswer());
+            System.out.println("问题: " + question.getQuestion_text());
+            System.out.println("正确答案: " + question.getCorrect_answer());
             System.out.println("---");
         }
     }
@@ -104,7 +104,7 @@ class QuizServiceTest {
             assertEquals(difficulty, question.getDifficulty());
             
             System.out.println(difficulty + "难度题目:");
-            System.out.println("问题: " + question.getQuestionText());
+            System.out.println("问题: " + question.getQuestion_text());
             System.out.println("---");
         }
     }
@@ -119,17 +119,17 @@ class QuizServiceTest {
         assertFalse(questions.isEmpty());
         
         QuizQuestion question = questions.get(0);
-        assertNotNull(question.getQuestionText());
+        assertNotNull(question.getQuestion_text());
         assertEquals("困难", question.getDifficulty());
         
         System.out.println("带要求的题目:");
         System.out.println("要求: " + requirement);
-        System.out.println("问题: " + question.getQuestionText());
-        System.out.println("选项A: " + question.getOptionA());
-        System.out.println("选项B: " + question.getOptionB());
-        System.out.println("选项C: " + question.getOptionC());
-        System.out.println("选项D: " + question.getOptionD());
-        System.out.println("正确答案: " + question.getCorrectAnswer());
+        System.out.println("问题: " + question.getQuestion_text());
+        System.out.println("选项A: " + question.getOption_a());
+        System.out.println("选项B: " + question.getOption_b());
+        System.out.println("选项C: " + question.getOption_c());
+        System.out.println("选项D: " + question.getOption_d());
+        System.out.println("正确答案: " + question.getCorrect_answer());
     }
 
     @Test
@@ -157,12 +157,12 @@ class QuizServiceTest {
     void testSaveQuestions() {
         // 测试保存功能
         QuizQuestion question = new QuizQuestion();
-        question.setQuestionText("测试问题");
-        question.setOptionA("选项A");
-        question.setOptionB("选项B");
-        question.setOptionC("选项C");
-        question.setOptionD("选项D");
-        question.setCorrectAnswer("A");
+        question.setQuestion_text("测试问题");
+        question.setOption_a("选项A");
+        question.setOption_b("选项B");
+        question.setOption_c("选项C");
+        question.setOption_d("选项D");
+        question.setCorrect_answer("A");
         question.setDifficulty("简单");
         question.setCategory("编程");
         
@@ -174,18 +174,18 @@ class QuizServiceTest {
         
         assertNotNull(savedQuestions);
         assertEquals(1, savedQuestions.size());
-        assertEquals("测试问题", savedQuestions.get(0).getQuestionText());
+        assertEquals("测试问题", savedQuestions.get(0).getQuestion_text());
     }
 
     @Test
     void testGetAllQuestions() {
         // 测试获取所有问题
         QuizQuestion question1 = new QuizQuestion();
-        question1.setQuestionText("问题1");
+        question1.setQuestion_text("问题1");
         question1.setDifficulty("简单");
         
         QuizQuestion question2 = new QuizQuestion();
-        question2.setQuestionText("问题2");
+        question2.setQuestion_text("问题2");
         question2.setDifficulty("中等");
         
         when(questionMapper.selectAll()).thenReturn(List.of(question1, question2));
@@ -194,7 +194,7 @@ class QuizServiceTest {
         
         assertNotNull(questions);
         assertEquals(2, questions.size());
-        assertEquals("问题1", questions.get(0).getQuestionText());
-        assertEquals("问题2", questions.get(1).getQuestionText());
+        assertEquals("问题1", questions.get(0).getQuestion_text());
+        assertEquals("问题2", questions.get(1).getQuestion_text());
     }
 } 

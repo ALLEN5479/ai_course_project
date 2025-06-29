@@ -88,15 +88,15 @@ class QuizServiceIntegrationTest {
             assertFalse(questions.isEmpty());
             
             QuizQuestion question = questions.get(0);
-            assertNotNull(question.getQuestionText());
-            assertNotNull(question.getOptionA());
-            assertNotNull(question.getOptionB());
-            assertNotNull(question.getOptionC());
-            assertNotNull(question.getOptionD());
-            assertNotNull(question.getCorrectAnswer());
+            assertNotNull(question.getQuestion_text());
+            assertNotNull(question.getOption_a());
+            assertNotNull(question.getOption_b());
+            assertNotNull(question.getOption_c());
+            assertNotNull(question.getOption_d());
+            assertNotNull(question.getCorrect_answer());
             
             System.out.println("AI服务连接成功！");
-            System.out.println("生成的问题: " + question.getQuestionText());
+            System.out.println("生成的问题: " + question.getQuestion_text());
             
         } catch (IOException e) {
             System.err.println("AI服务连接失败: " + e.getMessage());
@@ -113,12 +113,12 @@ class QuizServiceIntegrationTest {
             QuizQuestion q = questions.get(i);
             System.out.println("题目 " + (i + 1) + ":");
             System.out.println("  难度: " + q.getDifficulty());
-            System.out.println("  问题: " + q.getQuestionText());
-            System.out.println("  A: " + q.getOptionA());
-            System.out.println("  B: " + q.getOptionB());
-            System.out.println("  C: " + q.getOptionC());
-            System.out.println("  D: " + q.getOptionD());
-            System.out.println("  正确答案: " + q.getCorrectAnswer());
+            System.out.println("  问题: " + q.getQuestion_text());
+            System.out.println("  A: " + q.getOption_a());
+            System.out.println("  B: " + q.getOption_b());
+            System.out.println("  C: " + q.getOption_c());
+            System.out.println("  D: " + q.getOption_d());
+            System.out.println("  正确答案: " + q.getCorrect_answer());
             System.out.println("  ---");
         }
     }

@@ -46,7 +46,7 @@ class QuizServiceDatabaseTest {
         for (int i = 0; i < generatedQuestions.size(); i++) {
             QuizQuestion q = generatedQuestions.get(i);
             System.out.println("生成的题目 " + (i + 1) + ":");
-            System.out.println("  问题: " + q.getQuestionText());
+            System.out.println("  问题: " + q.getQuestion_text());
             System.out.println("  难度: " + q.getDifficulty());
             System.out.println("  ---");
         }
@@ -68,10 +68,10 @@ class QuizServiceDatabaseTest {
         // 查找刚保存的题目
         boolean foundSavedQuestions = false;
         for (QuizQuestion question : allQuestions) {
-            if (question.getQuestionText().equals(generatedQuestions.get(0).getQuestionText()) ||
-                question.getQuestionText().equals(generatedQuestions.get(1).getQuestionText())) {
+            if (question.getQuestion_text().equals(generatedQuestions.get(0).getQuestion_text()) ||
+                question.getQuestion_text().equals(generatedQuestions.get(1).getQuestion_text())) {
                 foundSavedQuestions = true;
-                System.out.println("找到保存的题目: " + question.getQuestionText());
+                System.out.println("找到保存的题目: " + question.getQuestion_text());
                 System.out.println("  ID: " + question.getId());
                 System.out.println("  难度: " + question.getDifficulty());
                 System.out.println("  分类: " + question.getCategory());
@@ -106,7 +106,7 @@ class QuizServiceDatabaseTest {
             QuizQuestion savedQuestion = savedQuestions.get(0);
             assertEquals(difficulty, savedQuestion.getDifficulty());
             
-            System.out.println("保存成功: " + savedQuestion.getQuestionText());
+            System.out.println("保存成功: " + savedQuestion.getQuestion_text());
             System.out.println("难度: " + savedQuestion.getDifficulty());
             System.out.println("---");
         }
@@ -135,34 +135,34 @@ class QuizServiceDatabaseTest {
         assertNotNull(originalQuestion.getId());
         
         System.out.println("保存的题目ID: " + originalQuestion.getId());
-        System.out.println("题目内容: " + originalQuestion.getQuestionText());
+        System.out.println("题目内容: " + originalQuestion.getQuestion_text());
         
         // 2. 根据ID查询题目
         System.out.println("\n2. 根据ID查询题目...");
         var foundQuestion = quizService.getQuestionById(originalQuestion.getId());
         assertTrue(foundQuestion.isPresent());
-        assertEquals(originalQuestion.getQuestionText(), foundQuestion.get().getQuestionText());
+        assertEquals(originalQuestion.getQuestion_text(), foundQuestion.get().getQuestion_text());
         
-        System.out.println("查询成功: " + foundQuestion.get().getQuestionText());
+        System.out.println("查询成功: " + foundQuestion.get().getQuestion_text());
         
         // 3. 更新题目
         System.out.println("\n3. 更新题目...");
         QuizQuestion updateData = new QuizQuestion();
-        updateData.setQuestionText("更新后的测试题目");
-        updateData.setOptionA("更新选项A");
-        updateData.setOptionB("更新选项B");
-        updateData.setOptionC("更新选项C");
-        updateData.setOptionD("更新选项D");
-        updateData.setCorrectAnswer("B");
+        updateData.setQuestion_text("更新后的测试题目");
+        updateData.setOption_a("更新选项A");
+        updateData.setOption_b("更新选项B");
+        updateData.setOption_c("更新选项C");
+        updateData.setOption_d("更新选项D");
+        updateData.setCorrect_answer("B");
         updateData.setDifficulty("中等");
         updateData.setCategory("编程");
         
         var updatedQuestion = quizService.updateQuestion(originalQuestion.getId(), updateData);
         assertTrue(updatedQuestion.isPresent());
-        assertEquals("更新后的测试题目", updatedQuestion.get().getQuestionText());
+        assertEquals("更新后的测试题目", updatedQuestion.get().getQuestion_text());
         assertEquals("中等", updatedQuestion.get().getDifficulty());
         
-        System.out.println("更新成功: " + updatedQuestion.get().getQuestionText());
+        System.out.println("更新成功: " + updatedQuestion.get().getQuestion_text());
         
         // 4. 删除题目
         System.out.println("\n4. 删除题目...");
@@ -192,7 +192,7 @@ class QuizServiceDatabaseTest {
                 System.out.println("示例题目:");
                 QuizQuestion example = allQuestions.get(0);
                 System.out.println("  ID: " + example.getId());
-                System.out.println("  问题: " + example.getQuestionText());
+                System.out.println("  问题: " + example.getQuestion_text());
                 System.out.println("  难度: " + example.getDifficulty());
             }
             

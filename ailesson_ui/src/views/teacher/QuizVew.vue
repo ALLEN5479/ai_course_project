@@ -70,14 +70,14 @@
               <span class="card-difficulty">{{ question.difficulty || '（无）' }}</span>
             </div>
             <div class="card-body">
-              <p class="question-text"><strong>问题：</strong>{{ question.questionText || '（无）' }}</p>
+              <p class="question-text"><strong>问题：</strong>{{ question.question_text || '（无）' }}</p>
               <div class="options">
-                <p class="option"><strong>A:</strong> {{ question.optionA || '（无）' }}</p>
-                <p class="option"><strong>B:</strong> {{ question.optionB || '（无）' }}</p>
-                <p class="option"><strong>C:</strong> {{ question.optionC || '（无）' }}</p>
-                <p class="option"><strong>D:</strong> {{ question.optionD || '（无）' }}</p>
+                <p class="option"><strong>A:</strong> {{ question.option_a || '（无）' }}</p>
+                <p class="option"><strong>B:</strong> {{ question.option_b || '（无）' }}</p>
+                <p class="option"><strong>C:</strong> {{ question.option_c || '（无）' }}</p>
+                <p class="option"><strong>D:</strong> {{ question.option_d || '（无）' }}</p>
               </div>
-              <p class="answer"><strong>正确答案：</strong>{{ question.correctAnswer || '（无）' }}</p>
+              <p class="answer"><strong>正确答案：</strong>{{ question.correct_answer || '（无）' }}</p>
             </div>
             <div class="card-footer">
               <button
@@ -112,14 +112,14 @@
             <span class="card-difficulty">{{ question.difficulty || '（无）' }}</span>
           </div>
           <div class="card-body">
-            <p class="question-text"><strong>问题：</strong>{{ question.questionText || '（无）' }}</p>
+            <p class="question-text"><strong>问题：</strong>{{ question.question_text || '（无）' }}</p>
             <div class="options">
-              <p class="option"><strong>A:</strong> {{ question.optionA || '（无）' }}</p>
-              <p class="option"><strong>B:</strong> {{ question.optionB || '（无）' }}</p>
-              <p class="option"><strong>C:</strong> {{ question.optionC || '（无）' }}</p>
-              <p class="option"><strong>D:</strong> {{ question.optionD || '（无）' }}</p>
+              <p class="option"><strong>A:</strong> {{ question.option_a || '（无）' }}</p>
+              <p class="option"><strong>B:</strong> {{ question.option_b || '（无）' }}</p>
+              <p class="option"><strong>C:</strong> {{ question.option_c || '（无）' }}</p>
+              <p class="option"><strong>D:</strong> {{ question.option_d || '（无）' }}</p>
             </div>
-            <p class="answer"><strong>正确答案：</strong>{{ question.correctAnswer || '（无）' }}</p>
+            <p class="answer"><strong>正确答案：</strong>{{ question.correct_answer || '（无）' }}</p>
           </div>
           <div class="card-footer">
             <button
@@ -143,15 +143,15 @@ import axios from 'axios';
 // 题目类型定义
 interface QuizQuestion {
   id?: number;
-  questionText: string;
-  optionA: string;
-  optionB: string;
-  optionC: string;
-  optionD: string;
-  correctAnswer: string;
+  question_text: string;
+  option_a: string;
+  option_b: string;
+  option_c: string;
+  option_d: string;
+  correct_answer: string;
   category?: string;
   difficulty: string;
-  createdAt?: string;
+  created_at?: string;
 }
 
 // 生成请求参数
@@ -201,7 +201,7 @@ const saveQuestion = async (question: QuizQuestion) => {
   isSaving.value = true;
   try {
     // 只发送后端需要的字段
-    const { id, createdAt, ...toSave } = question;
+    const { id, created_at, ...toSave } = question;
     await axios.post<QuizQuestion>(`${API_URL}`, toSave);
     alert('题目保存成功！');
     loadSavedQuestions(); // 保存后刷新列表

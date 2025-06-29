@@ -11,7 +11,7 @@ public interface QuizQuestionMapper {
      * 插入新问题
      */
     @Insert("INSERT INTO questions (question_text, option_a, option_b, option_c, option_d, correct_answer, category, difficulty, created_at) " +
-            "VALUES (#{questionText}, #{optionA}, #{optionB}, #{optionC}, #{optionD}, #{correctAnswer}, #{category}, #{difficulty}, NOW())")
+            "VALUES (#{question_text}, #{option_a}, #{option_b}, #{option_c}, #{option_d}, #{correct_answer}, #{category}, #{difficulty}, NOW())")
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     int insert(QuizQuestion question);
 
@@ -22,8 +22,8 @@ public interface QuizQuestionMapper {
             "INSERT INTO questions (question_text, option_a, option_b, option_c, option_d, correct_answer, category, difficulty, created_at) " +
             "VALUES " +
             "<foreach collection='list' item='item' separator=','>" +
-            "(#{item.questionText}, #{item.optionA}, #{item.optionB}, #{item.optionC}, #{item.optionD}, " +
-            "#{item.correctAnswer}, #{item.category}, #{item.difficulty}, NOW())" +
+            "(#{item.question_text}, #{item.option_a}, #{item.option_b}, #{item.option_c}, #{item.option_d}, " +
+            "#{item.correct_answer}, #{item.category}, #{item.difficulty}, NOW())" +
             "</foreach>" +
             "</script>")
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
@@ -38,7 +38,7 @@ public interface QuizQuestionMapper {
     /**
      * 查询所有问题
      */
-    @Select("SELECT * FROM questions ORDER BY created_at DESC")
+    @Select("SELECT * FROM questions ORDER BY id DESC")
     List<QuizQuestion> selectAll();
 
     /**
@@ -51,12 +51,12 @@ public interface QuizQuestionMapper {
      * 更新问题
      */
     @Update("UPDATE questions SET " +
-            "question_text = #{questionText}, " +
-            "option_a = #{optionA}, " +
-            "option_b = #{optionB}, " +
-            "option_c = #{optionC}, " +
-            "option_d = #{optionD}, " +
-            "correct_answer = #{correctAnswer}, " +
+            "question_text = #{question_text}, " +
+            "option_a = #{option_a}, " +
+            "option_b = #{option_b}, " +
+            "option_c = #{option_c}, " +
+            "option_d = #{option_d}, " +
+            "correct_answer = #{correct_answer}, " +
             "category = #{category}, " +
             "difficulty = #{difficulty} " +
             "WHERE id = #{id}")
