@@ -5,60 +5,60 @@
         <h1>智能课程系统</h1>
         <p>欢迎使用智能课程学习平台</p>
       </div>
-      
+
       <!-- 切换按钮 -->
       <div class="tab-container">
-        <el-button 
-          :type="activeTab === 'login' ? 'primary' : 'default'"
-          @click="activeTab = 'login'"
-          class="tab-btn"
+        <el-button
+            :type="activeTab === 'login' ? 'primary' : 'default'"
+            @click="activeTab = 'login'"
+            class="tab-btn"
         >
           登录
         </el-button>
-        <el-button 
-          :type="activeTab === 'register' ? 'primary' : 'default'"
-          @click="activeTab = 'register'"
-          class="tab-btn"
+        <el-button
+            :type="activeTab === 'register' ? 'primary' : 'default'"
+            @click="activeTab = 'register'"
+            class="tab-btn"
         >
           注册
         </el-button>
       </div>
 
       <!-- 登录表单 -->
-      <el-form 
-        v-if="activeTab === 'login'"
-        ref="loginFormRef"
-        :model="loginForm"
-        :rules="loginRules"
-        class="login-form"
+      <el-form
+          v-if="activeTab === 'login'"
+          ref="loginFormRef"
+          :model="loginForm"
+          :rules="loginRules"
+          class="login-form"
       >
         <el-form-item prop="userNumber">
           <el-input
-            v-model="loginForm.userNumber"
-            placeholder="请输入用户编号"
-            prefix-icon="User"
-            size="large"
+              v-model="loginForm.userNumber"
+              placeholder="请输入用户编号"
+              prefix-icon="User"
+              size="large"
           />
         </el-form-item>
-        
+
         <el-form-item prop="password">
           <el-input
-            v-model="loginForm.password"
-            type="password"
-            placeholder="请输入密码"
-            prefix-icon="Lock"
-            size="large"
-            show-password
+              v-model="loginForm.password"
+              type="password"
+              placeholder="请输入密码"
+              prefix-icon="Lock"
+              size="large"
+              show-password
           />
         </el-form-item>
 
         <el-form-item>
-          <el-button 
-            type="primary" 
-            size="large" 
-            class="submit-btn"
-            @click="handleLogin"
-            :loading="loading"
+          <el-button
+              type="primary"
+              size="large"
+              class="submit-btn"
+              @click="handleLogin"
+              :loading="loading"
           >
             登录
           </el-button>
@@ -66,72 +66,72 @@
       </el-form>
 
       <!-- 注册表单 -->
-      <el-form 
-        v-if="activeTab === 'register'"
-        ref="registerFormRef"
-        :model="registerForm"
-        :rules="registerRules"
-        class="register-form"
+      <el-form
+          v-if="activeTab === 'register'"
+          ref="registerFormRef"
+          :model="registerForm"
+          :rules="registerRules"
+          class="register-form"
       >
         <el-form-item prop="userNumber">
           <el-input
-            v-model="registerForm.userNumber"
-            placeholder="请输入学号/教师编号"
-            prefix-icon="User"
-            size="large"
+              v-model="registerForm.userNumber"
+              placeholder="请输入学号/教师编号"
+              prefix-icon="User"
+              size="large"
           />
         </el-form-item>
 
         <el-form-item prop="realName">
           <el-input
-            v-model="registerForm.realName"
-            placeholder="请输入真实姓名"
-            prefix-icon="UserFilled"
-            size="large"
+              v-model="registerForm.realName"
+              placeholder="请输入真实姓名"
+              prefix-icon="UserFilled"
+              size="large"
           />
         </el-form-item>
 
         <el-form-item prop="userType">
           <el-select
-            v-model="registerForm.userType"
-            placeholder="请选择用户类型"
-            size="large"
-            style="width: 100%"
+              v-model="registerForm.userType"
+              placeholder="请选择用户类型"
+              size="large"
+              style="width: 100%"
           >
             <el-option label="学生" :value="1" />
             <el-option label="教师" :value="2" />
           </el-select>
         </el-form-item>
-        
+
         <el-form-item prop="password">
           <el-input
-            v-model="registerForm.password"
-            type="password"
-            placeholder="请输入密码"
-            prefix-icon="Lock"
-            size="large"
-            show-password
+              v-model="registerForm.password"
+              type="password"
+              placeholder="请输入密码"
+              prefix-icon="Lock"
+              size="large"
+              show-password
           />
         </el-form-item>
 
         <el-form-item prop="confirmPassword">
           <el-input
-            v-model="registerForm.confirmPassword"
-            type="password"
-            placeholder="请确认密码"
-            prefix-icon="Lock"
-            size="large"
-            show-password
+              v-model="registerForm.confirmPassword"
+              type="password"
+              placeholder="请确认密码"
+              prefix-icon="Lock"
+              size="large"
+              show-password
           />
         </el-form-item>
 
         <el-form-item>
-          <el-button 
-            type="primary" 
-            size="large" 
-            class="submit-btn"
-            @click="handleRegister"
-            :loading="loading"
+          <el-button
+              type="primary"
+              size="large"
+              class="submit-btn"
+              @click="handleRegister"
+              :loading="loading"
           >
             注册
           </el-button>
@@ -229,7 +229,13 @@ const handleLogin = async () => {
         router.push({ path: '/student/dashboard', query: { name: user.name, user_id: user.user_id } })
       } else if (user.type === 2) {
         ElMessage.success(`欢迎教师 ${user.name} 登录！`)
-        router.push('/teacher/dashboard')
+        router.push({ 
+          path: '/teacher/dashboard', 
+          query: { 
+            teacherId: user.user_id, 
+            teacherName: user.name 
+          } 
+        })
       } else {
         ElMessage.success('登录成功')
         router.push('/')

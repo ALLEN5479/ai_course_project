@@ -12,5 +12,5 @@ public interface LoginMapper {
     int register(LoginEntity loginEntity);
 
     @Select("select * from user_msg where user_id=#{user_id} and password=#{password}")
-    LoginEntity login(int user_id, String password);
+    LoginEntity login(String user_id, String password);
 }

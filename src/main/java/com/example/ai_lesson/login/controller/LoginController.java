@@ -16,7 +16,7 @@ public class LoginController {
     private LoginMapper loginMapper;
 
     @RequestMapping("/login")
-    public LoginEntity login(int user_id, String password){
+    public LoginEntity login(String user_id, String password){
         return loginMapper.login(user_id, password);
     }
 
