@@ -90,7 +90,7 @@
                     type="danger"
                     @click="deleteStudent(scope.row)"
                 >
-                  删除学生
+                  删除科目
                 </el-button>
               </template>
             </el-table-column>
@@ -129,12 +129,59 @@
     </el-dialog>
 
     <!-- 删除确认对话框 -->
-    <el-dialog v-model="deleteDialogVisible" title="确认删除" width="400px">
-      <p>确定要删除学生 <strong>{{ selectedStudent?.name }}</strong> ({{ selectedStudent?.studentId }}) 吗？</p>
-      <p style="color: #f56c6c; font-size: 14px;">此操作不可恢复，请谨慎操作！</p>
+    <el-dialog v-model="deleteDialogVisible" title="删除学生科目" width="500px">
+      <div class="delete-content">
+        <p>学生：<strong>{{ selectedStudent?.name }}</strong> ({{ selectedStudent?.studentId }})</p>
+        <p class="delete-tip">请选择要删除的科目：</p>
+        
+        <div class="subject-selection">
+          <el-checkbox-group v-model="selectedSubjectsToDelete" :disabled="deleteLoading">
+            <el-checkbox 
+              v-for="subject in selectedStudent?.subjects" 
+              :key="subject"
+              :label="subject"
+              class="subject-checkbox"
+            >
+              {{ subject }}
+            </el-checkbox>
+          </el-checkbox-group>
+        </div>
+        
+        <div class="delete-summary" v-if="selectedSubjectsToDelete.length > 0">
+          <p>将删除以下科目：</p>
+          <div class="selected-subjects">
+            <el-tag 
+              v-for="subject in selectedSubjectsToDelete" 
+              :key="subject"
+              type="danger"
+              class="delete-tag"
+            >
+              {{ subject }}
+            </el-tag>
+          </div>
+        </div>
+        
+        <div class="delete-warning" v-if="selectedSubjectsToDelete.length === selectedStudent?.subjects?.length">
+          <el-alert
+            title="警告"
+            type="warning"
+            description="删除所有科目后，该学生将不再显示在列表中"
+            show-icon
+            :closable="false"
+          />
+        </div>
+      </div>
+      
       <template #footer>
-        <el-button @click="deleteDialogVisible = false">取消</el-button>
-        <el-button type="danger" @click="confirmDeleteStudent">确定删除</el-button>
+        <el-button @click="deleteDialogVisible = false" :disabled="deleteLoading">取消</el-button>
+        <el-button 
+          type="danger" 
+          @click="confirmDeleteStudent"
+          :disabled="selectedSubjectsToDelete.length === 0"
+          :loading="deleteLoading"
+        >
+          确定删除
+        </el-button>
       </template>
     </el-dialog>
   </div>
@@ -214,6 +261,8 @@ const addStudentRules: FormRules = {
 // 删除学生相关
 const deleteDialogVisible = ref(false)
 const selectedStudent = ref<any>(null)
+const selectedSubjectsToDelete = ref<string[]>([])
+const deleteLoading = ref(false)
 
 // 搜索和重置
 const handleSearch = () => {
@@ -293,20 +342,91 @@ const viewStudentProgress = (student: any) => {
 // 删除学生
 const deleteStudent = (student: any) => {
   selectedStudent.value = student
+  selectedSubjectsToDelete.value = [] // 默认不选中任何科目
   deleteDialogVisible.value = true
 }
 
-const confirmDeleteStudent = () => {
-  if (!selectedStudent.value) return
-
-  const index = students.value.findIndex(s => s.id === selectedStudent.value.id)
-  if (index > -1) {
-    students.value.splice(index, 1)
-    ElMessage.success('学生删除成功')
+const confirmDeleteStudent = async () => {
+  if (!selectedStudent.value || selectedSubjectsToDelete.value.length === 0) return
+  
+  deleteLoading.value = true
+  
+  const studentIndex = students.value.findIndex(s => s.id === selectedStudent.value.id)
+  if (studentIndex > -1) {
+    const student = students.value[studentIndex]
+    
+    try {
+      // 调用后端API删除选中的科目
+      const deletePromises = selectedSubjectsToDelete.value.map(async (courseName) => {
+        try {
+          const response = await axios.get('http://localhost:8080/deleteStudentCourse', {
+            params: {
+              user_id: student.studentId,
+              course_name: courseName
+            }
+          })
+          console.log(`删除科目 ${courseName} 的结果:`, response.data)
+          return { courseName, success: response.data > 0 }
+        } catch (error) {
+          console.error(`删除科目 ${courseName} 失败:`, error)
+          return { courseName, success: false }
+        }
+      })
+      
+      const results = await Promise.all(deletePromises)
+      const successCount = results.filter(r => r.success).length
+      const failedCourses = results.filter(r => !r.success).map(r => r.courseName)
+      
+      if (successCount === selectedSubjectsToDelete.value.length) {
+        // 所有科目删除成功
+        if (selectedSubjectsToDelete.value.length === student.subjects.length) {
+          // 删除所有科目，移除学生记录
+          students.value.splice(studentIndex, 1)
+          ElMessage.success(`已删除学生 ${student.name} 的所有科目`)
+        } else {
+          // 删除部分科目，更新学生记录
+          const remainingSubjects = student.subjects.filter(
+            subject => !selectedSubjectsToDelete.value.includes(subject)
+          )
+          
+          students.value[studentIndex] = {
+            ...student,
+            subjects: remainingSubjects
+          }
+          
+          ElMessage.success(`已删除 ${selectedSubjectsToDelete.value.join('、')} 科目`)
+        }
+      } else if (successCount > 0) {
+        // 部分删除成功
+        const successCourses = results.filter(r => r.success).map(r => r.courseName)
+        const failedCourses = results.filter(r => !r.success).map(r => r.courseName)
+        
+        // 更新学生记录，只保留删除失败的科目
+        const remainingSubjects = student.subjects.filter(
+          subject => !successCourses.includes(subject)
+        )
+        
+        students.value[studentIndex] = {
+          ...student,
+          subjects: remainingSubjects
+        }
+        
+        ElMessage.warning(`部分删除成功：${successCourses.join('、')} 已删除，${failedCourses.join('、')} 删除失败`)
+      } else {
+        // 所有删除都失败
+        ElMessage.error(`删除失败：${failedCourses.join('、')}`)
+      }
+      
+    } catch (error) {
+      console.error('删除操作失败:', error)
+      ElMessage.error('删除操作失败，请稍后重试')
+    }
   }
-
+  
+  deleteLoading.value = false
   deleteDialogVisible.value = false
   selectedStudent.value = null
+  selectedSubjectsToDelete.value = []
 }
 
 // 返回主页
@@ -507,5 +627,52 @@ onMounted(() => {
 :deep(.el-dialog__footer) {
   border-top: 1px solid #eee;
   padding: 15px 20px 20px;
+}
+
+.delete-content {
+  padding: 20px;
+}
+
+.delete-tip {
+  margin-bottom: 15px;
+  color: #666;
+  font-size: 14px;
+}
+
+.subject-selection {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.subject-checkbox {
+  display: block;
+  margin-bottom: 10px;
+  padding: 8px 12px;
+  border: 1px solid #e4e7ed;
+  border-radius: 6px;
+  background-color: white;
+  transition: all 0.3s;
+}
+
+.subject-checkbox:hover {
+  border-color: #409eff;
+  background-color: #f0f9ff;
+}
+
+.selected-subjects {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.delete-tag {
+  margin: 0;
+}
+
+.delete-warning {
+  margin-top: 15px;
 }
 </style>

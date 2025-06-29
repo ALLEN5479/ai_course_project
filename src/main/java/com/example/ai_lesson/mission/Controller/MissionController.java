@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@CrossOrigin(origins = "*")
+@CrossOrigin
 @RequestMapping("/api/mission")
 public class MissionController {
 
@@ -38,7 +38,7 @@ public class MissionController {
             if (pageSize <= 0 || pageSize > 100) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "页面大小必须在1-100之间");
             }
-            
+
             Map<String, Object> result = missionService.selectMissionList(pageNum, pageSize, missionName, missionType, teachingClass);
             return ResponseEntity.ok(result);
         } catch (ResponseStatusException e) {
@@ -54,16 +54,21 @@ public class MissionController {
     /**
      * 获取任务详情
      */
+//    @GetMapping("/{missionId}")
+//    public ResponseEntity<Mission> getInfo(@PathVariable Integer missionId) {
+//        Mission mission = missionService.selectMissionById(missionId);
+//        return ResponseEntity.ok(mission);
+//    }
     @GetMapping("/{missionId}")
     public ResponseEntity<Map<String, Object>> getInfo(@PathVariable Integer missionId) {
         try {
             if (missionId == null || missionId <= 0) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "任务ID无效");
             }
-            
+
             Mission mission = missionService.selectMissionById(missionId);
             Map<String, Object> response = new HashMap<>();
-            
+
             if (mission != null) {
                 response.put("success", true);
                 response.put("data", mission);
@@ -96,7 +101,7 @@ public class MissionController {
             if (mission.getMissionName() == null || mission.getMissionName().trim().isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "任务名称不能为空");
             }
-            
+
             int result = missionService.insertMission(mission);
             Map<String, Object> response = new HashMap<>();
             response.put("success", result > 0);
@@ -125,7 +130,7 @@ public class MissionController {
             if (mission.getMissionId() <= 0) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "任务ID无效");
             }
-            
+
             int result = missionService.updateMission(mission);
             Map<String, Object> response = new HashMap<>();
             response.put("success", result > 0);
@@ -149,7 +154,7 @@ public class MissionController {
             if (missionId == null || missionId <= 0) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "任务ID无效");
             }
-            
+
             int result = missionService.deleteMissionById(missionId);
             Map<String, Object> response = new HashMap<>();
             response.put("success", result > 0);

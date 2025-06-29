@@ -22,7 +22,7 @@
         <div class="overview-section">
           <h2>工作概览</h2>
           <el-row :gutter="20">
-            <el-col :span="6">
+            <el-col :span="8">
               <el-card class="stat-card">
                 <div class="stat-content">
                   <div class="stat-number">{{ stats.totalCourses }}</div>
@@ -30,7 +30,7 @@
                 </div>
               </el-card>
             </el-col>
-            <el-col :span="6">
+            <el-col :span="8">
               <el-card class="stat-card">
                 <div class="stat-content">
                   <div class="stat-number">{{ stats.totalStudents }}</div>
@@ -38,19 +38,11 @@
                 </div>
               </el-card>
             </el-col>
-            <el-col :span="6">
+            <el-col :span="8">
               <el-card class="stat-card">
                 <div class="stat-content">
                   <div class="stat-number">{{ stats.pendingTasks }}</div>
                   <div class="stat-label">待处理任务</div>
-                </div>
-              </el-card>
-            </el-col>
-            <el-col :span="6">
-              <el-card class="stat-card">
-                <div class="stat-content">
-                  <div class="stat-number">{{ stats.activeClasses }}</div>
-                  <div class="stat-label">活跃班级</div>
                 </div>
               </el-card>
             </el-col>
@@ -202,9 +194,8 @@ const getTeacherInfo = () => {
 // 统计数据
 const stats = ref({
   totalCourses: 0,
-  totalStudents: 156,
-  pendingTasks: 8,
-  activeClasses: 12
+  totalStudents: 0,
+  pendingTasks: 8
 })
 
 // 我的课程
@@ -251,6 +242,34 @@ const fetchTeacherCourses = async () => {
     ElMessage.error('获取课程数据失败，请检查网络连接')
   } finally {
     loading.value = false
+  }
+}
+
+// 获取教师教导的学生数量
+const fetchStudentCount = async () => {
+  if (!teacherId.value) {
+    ElMessage.warning('教师ID不存在，无法获取学生数据')
+    return
+  }
+
+  try {
+    const response = await axios.get('http://localhost:8080/student/course/count', {
+      params: {
+        teacher_id: teacherId.value
+      }
+    })
+    
+    if (response.data !== undefined && response.data !== null) {
+      stats.value.totalStudents = response.data
+      console.log('获取到学生数量:', response.data)
+    } else {
+      stats.value.totalStudents = 0
+      console.log('未获取到学生数量数据')
+    }
+  } catch (error) {
+    console.error('获取学生数量失败:', error)
+    ElMessage.error('获取学生数量失败')
+    stats.value.totalStudents = 0
   }
 }
 
@@ -355,6 +374,7 @@ const goToClassTaskManager = () => {
 onMounted(() => {
   getTeacherInfo()
   fetchTeacherCourses()
+  fetchStudentCount()
 })
 </script>
 
