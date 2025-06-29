@@ -186,25 +186,44 @@ import { ref, reactive, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import { View, Download, Document, MagicStick } from '@element-plus/icons-vue';
+import { taskGradingApi } from '@/api/taskApi';
 
 const router = useRouter();
 const route = useRoute();
 
+interface TaskInfo {
+  taskName: string;
+  studentName: string;
+  submitTime: string;
+  taskType: string;
+  deadline: string;
+  status: string;
+  reportName: string;
+  fileSize: string;
+  fileType: string;
+}
+
+interface GradingForm {
+  score: number | null;
+  comment: string;
+  tags: string[];
+}
+
 // 任务信息
-const taskInfo = reactive({
-  taskName: '数据结构项目报告',
-  studentName: '张三',
-  submitTime: '2024-01-15 14:30:00',
-  taskType: '报告任务',
-  deadline: '2024-01-16 23:59:59',
+const taskInfo = reactive<TaskInfo>({
+  taskName: '',
+  studentName: '',
+  submitTime: '',
+  taskType: '',
+  deadline: '',
   status: 'pending',
-  reportName: '数据结构项目报告.pdf',
-  fileSize: '2.5MB',
-  fileType: 'PDF文档'
+  reportName: '',
+  fileSize: '',
+  fileType: ''
 });
 
 // 批改表单
-const gradingForm = reactive({
+const gradingForm = reactive<GradingForm>({
   score: null,
   comment: '',
   tags: []
@@ -221,6 +240,35 @@ const aiAnalysis = reactive({
   comment: '该报告内容完整，逻辑清晰，技术实现合理。学生在项目背景描述、技术方案设计、实现过程记录等方面都做得很好。代码结构清晰，注释详细。建议在性能分析部分可以更加深入，可以添加更多实际测试数据。总体来说是一份质量较高的项目报告。',
   tags: ['内容完整', '逻辑清晰', '技术深度', '格式规范']
 });
+
+// 获取任务批改详情
+const fetchTaskGradingDetail = async (submissionId: number) => {
+  try {
+    const response = await taskGradingApi.getTaskGradingDetail(submissionId);
+    const data = response.data;
+    
+    // 填充任务信息
+    taskInfo.taskName = data.taskName;
+    taskInfo.studentName = data.studentName;
+    taskInfo.submitTime = data.submitTime;
+    taskInfo.taskType = data.taskType;
+    taskInfo.deadline = data.deadline;
+    taskInfo.status = data.status;
+    taskInfo.reportName = data.reportName;
+    taskInfo.fileSize = data.fileSize;
+    taskInfo.fileType = data.fileType;
+    
+    // 如果已经批改过，填充批改信息
+    if (data.grading) {
+      gradingForm.score = data.grading.score;
+      gradingForm.comment = data.grading.comment;
+      gradingForm.tags = data.grading.tags || [];
+    }
+  } catch (error) {
+    console.error('获取任务批改详情失败:', error);
+    ElMessage.error('获取任务批改详情失败');
+  }
+};
 
 // 方法
 function goBack() {
@@ -252,7 +300,7 @@ function applyAiGrading() {
   ElMessage.success('已应用AI建议！');
 }
 
-function submitGrading() {
+async function submitGrading() {
   if (!gradingForm.score) {
     ElMessage.warning('请填写评分');
     return;
@@ -264,16 +312,38 @@ function submitGrading() {
   
   submitting.value = true;
   
-  // 模拟提交
-  setTimeout(() => {
-    submitting.value = false;
+  try {
+    const submissionId = parseInt(route.query.submissionId as string);
+    await taskGradingApi.submitGrading(submissionId, {
+      score: gradingForm.score,
+      comment: gradingForm.comment,
+      tags: gradingForm.tags
+    });
+    
     taskInfo.status = 'graded';
     ElMessage.success('批改提交成功！');
-  }, 2000);
+  } catch (error) {
+    console.error('提交批改失败:', error);
+    ElMessage.error('提交批改失败');
+  } finally {
+    submitting.value = false;
+  }
 }
 
-function saveDraft() {
-  ElMessage.success('草稿保存成功！');
+async function saveDraft() {
+  try {
+    const submissionId = parseInt(route.query.submissionId as string);
+    await taskGradingApi.saveGradingDraft(submissionId, {
+      score: gradingForm.score,
+      comment: gradingForm.comment,
+      tags: gradingForm.tags
+    });
+    
+    ElMessage.success('草稿保存成功！');
+  } catch (error) {
+    console.error('保存草稿失败:', error);
+    ElMessage.error('保存草稿失败');
+  }
 }
 
 function resetForm() {
@@ -286,10 +356,12 @@ function resetForm() {
 // 生命周期
 onMounted(() => {
   // 从路由参数获取任务ID
-  const taskId = route.query.taskId;
-  console.log('批改任务ID:', taskId);
-  
-  // 这里可以根据taskId加载具体的任务数据
+  const submissionId = route.query.submissionId;
+  if (submissionId) {
+    fetchTaskGradingDetail(parseInt(submissionId as string));
+  } else {
+    ElMessage.error('缺少任务提交ID参数');
+  }
 });
 </script>
 

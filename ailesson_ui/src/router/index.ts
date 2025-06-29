@@ -30,6 +30,11 @@ const router = createRouter({
           component: () => import('../views/student/StudentCourses.vue'),
         },
         {
+          path: 'courses/:id',
+          name: 'student-course-detail',
+          component: () => import('../views/student/StudentCourseDetail.vue'),
+        },
+        {
           path: 'knowledge-graph',
           name: 'student-knowledge-graph',
           component: () => import('../views/student/KnowledgeGraph.vue'),
