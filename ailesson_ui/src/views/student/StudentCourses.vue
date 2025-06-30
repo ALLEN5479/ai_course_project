@@ -23,6 +23,9 @@
             </el-card>
           </el-col>
         </el-row>
+        <div v-if="courses.length === 0" class="no-courses">
+          <el-empty description="暂无课程数据" />
+        </div>
       </el-main>
     </el-container>
   </div>
@@ -30,10 +33,12 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router' // 添加 useRoute
+import { useRouter, useRoute } from 'vue-router'
+import axios from 'axios'
+import { ElMessage } from 'element-plus'
 
 const router = useRouter()
-const route = useRoute() // 获取当前路由信息
+const route = useRoute()
 
 // 存储从路由中获取的参数
 const routeParams = ref({
@@ -41,36 +46,67 @@ const routeParams = ref({
   name: route.query.name || ''
 })
 
-const courses = ref([
-  {
-    id: 1,
-    name: '数据结构与算法',
-    description: '学习基本的数据结构和算法知识',
-    teacher: '李老师',
-    progress: 75
-  },
-  {
-    id: 2,
-    name: '计算机网络',
-    description: '深入了解网络协议和通信原理',
-    teacher: '王老师',
-    progress: 45
-  },
-  {
-    id: 3,
-    name: '操作系统',
-    description: '学习操作系统的基本概念和原理',
-    teacher: '张老师',
-    progress: 30
+// 课程数据（初始为空数组）
+const courses = ref<any[]>([])
+
+// 获取课程数据
+const fetchCourses = async () => {
+  if (!routeParams.value.user_id) {
+    ElMessage.error('用户ID缺失')
+    return
   }
-])
+
+  try {
+    // 1. 获取学生课程列表
+    const { data: courseMsgs } = await axios.get("http://localhost:8080/student/courses", {
+      params: { user_id: routeParams.value.user_id }
+    })
+
+    // 2. 为每个课程获取教师姓名
+    const coursesWithTeachers = await Promise.all(
+        courseMsgs.map(async (course: any) => {
+          try {
+            const { data: teacherName } = await axios.get("http://localhost:8080/getTeacherName", {
+              params: { teacher_id: course.teacher_id }
+            })
+            return {
+              id: course.course_id,
+              name: course.course_name,
+              description: course.description,
+              teacher: teacherName,
+              progress: course.progress || 0
+            }
+          } catch (error) {
+            console.error("获取教师姓名失败:", error)
+            return {
+              id: course.course_id,
+              name: course.course_name,
+              description: course.description,
+              teacher: "未知教师",
+              progress: course.progress || 0
+            }
+          }
+        })
+    )
+
+    courses.value = coursesWithTeachers
+  } catch (error) {
+    console.error("获取课程数据失败:", error)
+    ElMessage.error('获取课程数据失败')
+    courses.value = []
+  }
+}
 
 // 跳转到课程详情页时保留参数
 const viewCourse = (course: any) => {
   router.push({
-    path: `/student/courses/${course.id}`,
+    path: '/student/learning',
     query: {
-      ...routeParams.value // 保留当前所有参数
+      ...routeParams.value,
+      courseId: course.id,
+      courseName: course.name,
+      courseDescription: course.description,
+      teacherName: course.teacher
     }
   })
 }
@@ -80,24 +116,26 @@ const goBack = () => {
   router.push({
     path: '/student/dashboard',
     query: {
-      ...routeParams.value // 保留当前所有参数
+      ...routeParams.value
     }
   })
 }
 
-// 监听路由参数变化（可选）
+// 组件挂载时获取课程数据
 onMounted(() => {
-  // 如果需要在组件内部更新参数，可以添加监听
-  // 但通常参数在路由跳转时不会变化，这里主要是为了确保初始化
+  // 更新路由参数
   routeParams.value = {
     user_id: route.query.user_id || '',
     name: route.query.name || ''
   }
+
+  // 获取课程数据
+  fetchCourses()
 })
 </script>
 
 <style scoped>
-/* 样式保持不变 */
+/* 保持原有样式不变 */
 .student-courses {
   min-height: 100vh;
   background-color: #f5f7fa;
@@ -160,5 +198,10 @@ onMounted(() => {
 .course-meta span {
   font-size: 12px;
   color: #999;
+}
+
+.no-courses {
+  margin-top: 50px;
+  text-align: center;
 }
 </style>

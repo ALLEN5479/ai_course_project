@@ -7,16 +7,35 @@
     <el-card class="box-card">
       <div slot="header" class="clearfix">
         <span>我的课程</span>
+        <el-button style="float: right; padding: 3px 0" type="text" @click="refreshCourses">刷新</el-button>
       </div>
-      <el-row :gutter="20">
-        <el-col v-for="course in pagedCourses" :key="course.id" :span="8">
-          <el-card class="course-card" @click="goToCourse(course.id)">
-            <div class="course-title">{{ course.name }}</div>
-            <div class="course-desc">{{ course.description }}</div>
+      
+      <!-- 加载状态 -->
+      <div v-if="loading" class="loading-container">
+        <el-loading-component />
+      </div>
+      
+      <!-- 课程列表 -->
+      <el-row v-else :gutter="20">
+        <el-col v-for="course in pagedCourses" :key="course.course_id" :span="8">
+          <el-card class="course-card" @click="goToCourse(course.course_id)">
+            <div class="course-title">{{ course.course_name }}</div>
+            <div class="course-desc">{{ course.description || '暂无描述' }}</div>
+            <div class="course-info">
+              <el-tag size="small" type="info">课程ID: {{ course.course_id }}</el-tag>
+              <el-tag size="small" type="success">教师ID: {{ course.teacher_id }}</el-tag>
+            </div>
           </el-card>
         </el-col>
       </el-row>
-      <div class="pagination">
+      
+      <!-- 空状态 -->
+      <div v-if="!loading && courses.length === 0" class="empty-state">
+        <el-empty description="暂无课程数据" />
+      </div>
+      
+      <!-- 分页 -->
+      <div v-if="courses.length > 0" class="pagination">
         <el-pagination
           background
           layout="prev, pager, next"
@@ -30,34 +49,100 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, computed, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { ElMessage } from 'element-plus';
+import axios from 'axios';
 
-// 假数据，后续可用API替换
-const courses = ref([
-  { id: 1, name: '人工智能基础', description: 'AI入门课程' },
-  { id: 2, name: '机器学习', description: '机器学习核心知识' },
-  { id: 3, name: '深度学习', description: '深度学习与神经网络' },
-  { id: 4, name: '自然语言处理', description: 'NLP基础与应用' },
-  { id: 5, name: '计算机视觉', description: 'CV基础与项目' },
-  { id: 6, name: '数据挖掘', description: '数据分析与挖掘' },
-]);
+const router = useRouter();
+const route = useRoute();
+
+// 教师信息
+const teacherId = ref('');
+const teacherName = ref('');
+
+// 加载状态
+const loading = ref(false);
+
+// 课程数据
+const courses = ref([]);
 const pageSize = 6;
 const currentPage = ref(1);
+
+// 分页后的课程
 const pagedCourses = computed(() => {
   const start = (currentPage.value - 1) * pageSize;
   return courses.value.slice(start, start + pageSize);
 });
-const router = useRouter();
+
+// 获取教师信息
+const getTeacherInfo = () => {
+  const id = route.query.teacherId as string;
+  const name = route.query.teacherName as string;
+  
+  if (id) {
+    teacherId.value = id;
+  }
+  
+  if (name) {
+    teacherName.value = name;
+  }
+};
+
+// 获取教师课程数据
+const fetchTeacherCourses = async () => {
+  if (!teacherId.value) {
+    ElMessage.warning('教师ID不存在，无法获取课程数据');
+    return;
+  }
+
+  loading.value = true;
+  try {
+    // 调用getCoursesByTeacherId接口获取课程数据
+    const { data: courseData } = await axios.get("http://localhost:8080/getCoursesByTeacherId", {
+      params: {
+        teacher_id: teacherId.value
+      }
+    });
+    
+    courses.value = courseData || [];
+    ElMessage.success('课程数据加载成功');
+  } catch (error) {
+    console.error('获取课程数据失败:', error);
+    ElMessage.error('获取课程数据失败，请检查网络连接');
+  } finally {
+    loading.value = false;
+  }
+};
+
+// 刷新课程数据
+const refreshCourses = () => {
+  fetchTeacherCourses();
+};
+
 function goToCourse(id: number) {
-  router.push(`/teacher/courses/${id}`);
+  router.push({
+    path: `/teacher/courses/${id}`,
+    query: {
+      teacherId: teacherId.value,
+      teacherName: teacherName.value
+    }
+  });
 }
+
 function handlePageChange(page: number) {
   currentPage.value = page;
 }
+
 function goBack() {
   router.back();
 }
+
+// 组件挂载时获取教师信息和课程数据
+onMounted(() => {
+  getTeacherInfo();
+  fetchTeacherCourses();
+});
 </script>
 
 <style scoped>
@@ -94,6 +179,24 @@ function goBack() {
 .course-desc {
   color: #666;
   font-size: 14px;
+  margin-bottom: 12px;
+}
+.course-info {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+.empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
 }
 .pagination {
   margin-top: 24px;

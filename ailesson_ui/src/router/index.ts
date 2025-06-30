@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import LoginView from '../views/LoginView.vue'
+import QuizVew from "@/views/teacher/QuizVew.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -29,6 +30,11 @@ const router = createRouter({
           component: () => import('../views/student/StudentCourses.vue'),
         },
         {
+          path: 'courses/:id',
+          name: 'student-course-detail',
+          component: () => import('../views/student/StudentCourseDetail.vue'),
+        },
+        {
           path: 'knowledge-graph',
           name: 'student-knowledge-graph',
           component: () => import('../views/student/KnowledgeGraph.vue'),
@@ -36,6 +42,11 @@ const router = createRouter({
         {
           path: 'learning',
           name: 'student-learning',
+          component: () => import('../views/student/LearningView.vue'),
+        },
+        {
+          path: 'learning/:courseId',
+          name: 'student-learning-with-course',
           component: () => import('../views/student/LearningView.vue'),
         },
         {
@@ -52,6 +63,16 @@ const router = createRouter({
           path: 'profile',
           name: 'student-profile',
           component: () => import('../views/student/StudentProfile.vue'),
+        },
+        {
+          path: 'study-resources',
+          name: 'student-study-resources',
+          component: () => import('../views/student/StudyResources.vue'),
+        },
+        {
+          path: 'study-resources/:nodeId',
+          name: 'student-study-resources-with-node',
+          component: () => import('../views/student/StudyResources.vue'),
         },
         // {
         //   path: 'self-study',
@@ -94,6 +115,46 @@ const router = createRouter({
           path: 'knowledge-graph',
           name: 'teacher-knowledge-graph',
           component: () => import('../views/teacher/KnowledgeGraph.vue'),
+        },
+        // {
+        //   path: 'test',
+        //   name: 'test-page',
+        //   component: () => import('../views/teacher/TestPage.vue'),
+        // },
+        // {
+        //   path: 'class-mission-student',
+        //   name: 'class_mission_student',
+        //   component: () => import('../views/teacher/ClassMissionStudent.vue'),
+        // },
+        {
+          path: 'profile',
+          name: 'teacher-profile',
+          component: () => import('../views/teacher/TeacherProfile.vue'),
+        },
+        {
+          path: 'student-management',
+          name: 'teacher-student-management',
+          component: () => import('../views/teacher/StudentManagement.vue'),
+        },
+        {
+          path: 'task-library',
+          name: 'teacher-task-library',
+          component: () => import('../views/teacher/TaskLibraryManager.vue'),
+        },
+        {
+          path: 'class-task-manager',
+          name: 'teacher-class-task-manager',
+          component: () => import('../views/teacher/ClassTaskManager.vue'),
+        },
+        {
+          path: 'task-grading',
+          name: 'task-grading',
+          component: () => import('../views/teacher/TaskGrading.vue'),
+        },
+        {
+          path: 'course-submission-list',
+          name: 'course-submission-list',
+          component: () => import('../views/teacher/CourseSubmissionList.vue'),
         },
       ]
     },

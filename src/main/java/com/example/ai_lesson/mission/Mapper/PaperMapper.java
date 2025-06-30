@@ -7,24 +7,22 @@ import java.util.List;
 
 @Mapper
 public interface PaperMapper {
-    // 查询试卷列表
-    @Select("SELECT * FROM paper")
-    List<Paper> selectPaperList();
-
-    // 根据ID查询试卷
-    @Select("SELECT * FROM paper WHERE paper_id = #{paperId}")
-    Paper selectPaperById(int paperId);
-
-    // 新增试卷
-    @Insert("INSERT INTO paper(paper_name) VALUES(#{paperName})")
-    @Options(useGeneratedKeys = true, keyProperty = "paper_id")
-    int insertPaper(Paper paper);
-
-    // 更新试卷
-    @Update("UPDATE paper SET paper_name=#{paperName} WHERE paper_id=#{paperId}")
-    int updatePaper(Paper paper);
-
-    // 删除试卷
-    @Delete("DELETE FROM paper WHERE paper_id=#{paperId}")
-    int deletePaper(int paperId);
+    
+    @Select("SELECT * FROM papers")
+    List<Paper> findAll();
+    
+    @Select("SELECT * FROM papers WHERE paper_id = #{paperId}")
+    Paper findById(Integer paperId);
+    
+    @Insert("INSERT INTO papers (paper_name, paper_description, total_score) " +
+            "VALUES (#{paperName}, #{paperDescription}, #{totalScore})")
+    @Options(useGeneratedKeys = true, keyProperty = "paperId")
+    int insert(Paper paper);
+    
+    @Update("UPDATE papers SET paper_name = #{paperName}, paper_description = #{paperDescription}, " +
+            "total_score = #{totalScore} WHERE paper_id = #{paperId}")
+    int update(Paper paper);
+    
+    @Delete("DELETE FROM papers WHERE paper_id = #{paperId}")
+    int deleteById(Integer paperId);
 }
