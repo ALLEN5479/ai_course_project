@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, watch } from 'vue'
+import { computed, ref, onMounted, watch, nextTick, onBeforeUnmount } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { Document, VideoCamera, Files, Monitor, ArrowLeft, ArrowRight } from '@element-plus/icons-vue'
 import axios from 'axios'
 
 const router = useRouter()
 const route = useRoute()
-const goBack = () => {
+const goBack = async () => {
+  await reportRecord()
   router.back()
 }
 
@@ -114,7 +115,149 @@ onMounted(() => {
   if (nodeId) {
     loadResources(nodeId)
   }
+  // 监听页面关闭
+  window.addEventListener('beforeunload', handleBeforeUnload)
 })
+
+// 计时相关变量
+const isHovering = ref(false)
+const hoverStartTime = ref<number | null>(null)
+const totalHoverTime = ref(0)
+
+// 鼠标进入资源区
+const handleMouseEnter = () => {
+  isHovering.value = true
+  hoverStartTime.value = Date.now()
+}
+// 鼠标离开资源区
+const handleMouseLeave = () => {
+  isHovering.value = false
+  if (hoverStartTime.value) {
+    const duration = Date.now() - hoverStartTime.value
+    totalHoverTime.value += duration
+    // 只对非视频资源计时
+    if (selectedResource.value && selectedResource.value.res_type !== 'video') {
+      currentStudyTime.value += duration
+    }
+    hoverStartTime.value = null
+  }
+}
+
+const videoPlayer = ref<HTMLVideoElement | null>(null)
+
+// 跳看统计相关变量
+const seekCount = ref(0)
+const totalSeekTime = ref(0)
+let lastCurrentTime = 0
+
+// 统计相关变量
+const currentStudyTime = ref(0) // 当前资源学习时长（ms）
+const currentSeekCount = ref(0) // 当前资源跳看次数
+let lastResourceId = ref<number | null>(null)
+
+// 记录上报函数
+const reportRecord = async () => {
+  console.log(userId.value+','+lastResourceId.value+','+currentStudyTime.value+','+currentSeekCount.value)
+  if (!userId.value || !lastResourceId.value) return
+  try {
+    await axios.post('http://localhost:8080/updateRecord', null, {
+      params: {
+        student_id: userId.value,
+        resource_id: lastResourceId.value,
+        actual_time: (currentStudyTime.value/1000).toFixed(2),
+        jump_time: currentSeekCount.value
+      }
+    })
+  } catch (e) {
+    console.error('上报学习记录失败', e)
+  }
+}
+
+// 重置统计
+const resetStats = () => {
+  currentStudyTime.value = 0
+  currentSeekCount.value = 0
+  hoverStartTime.value = null
+  totalHoverTime.value = 0
+  seekCount.value = 0
+  totalSeekTime.value = 0
+  lastCurrentTime = 0
+}
+
+// 切换资源时上报并重置
+watch(selectedId, async (newId, oldId) => {
+  if (oldId && lastResourceId.value) {
+    // 先上报旧资源
+    await reportRecord()
+    resetStats()
+  }
+  lastResourceId.value = newId
+})
+
+// 页面关闭/刷新时上报
+const handleBeforeUnload = async (e: BeforeUnloadEvent) => {
+  await reportRecord()
+}
+
+// 页面卸载时移除事件
+onBeforeUnmount(() => {
+  window.removeEventListener('beforeunload', handleBeforeUnload)
+  reportRecord()
+})
+
+// 监听selectedResource变化，若为视频则绑定ratechange和seeked事件
+watch(selectedResource, async (newVal) => {
+  await nextTick()
+  if (newVal && newVal.res_type === 'video' && videoPlayer.value) {
+    // 绑定事件前先移除旧事件，防止重复
+    videoPlayer.value.onratechange = null
+    videoPlayer.value.onseeked = null
+    lastCurrentTime = 0
+    seekCount.value = 0
+    totalSeekTime.value = 0
+    // 限速
+    videoPlayer.value.onratechange = () => {
+      if (videoPlayer.value && videoPlayer.value.playbackRate > 1) {
+        videoPlayer.value.playbackRate = 1
+      }
+    }
+    // 跳看统计
+    videoPlayer.value.onseeked = () => {
+      if (videoPlayer.value) {
+        const seekedTime = Math.abs(videoPlayer.value.currentTime - lastCurrentTime)
+        // 跳看时间大于1秒才计入（防止误差）
+        if (seekedTime > 1) {
+          seekCount.value++
+          totalSeekTime.value += seekedTime
+          currentSeekCount.value = seekCount.value
+        }
+        lastCurrentTime = videoPlayer.value.currentTime
+      }
+    }
+    // 计时：每秒累加实际观看时长
+    let lastTime = Date.now()
+    const timer = setInterval(() => {
+      if (videoPlayer.value && !videoPlayer.value.paused && !videoPlayer.value.ended) {
+        const now = Date.now()
+        currentStudyTime.value += now - lastTime
+        lastTime = now
+      } else {
+        lastTime = Date.now()
+      }
+    }, 1000)
+    // 组件卸载/切换资源时清理
+    onBeforeUnmount(() => clearInterval(timer))
+    watch(selectedId, () => clearInterval(timer), { once: true })
+    // 初始化时也强制为1倍速
+    videoPlayer.value.playbackRate = 1
+    lastCurrentTime = 0
+  } else if (newVal && newVal.res_type !== 'video') {
+    // 非视频资源，跳看次数为0
+    currentSeekCount.value = 0
+  }
+})
+
+const userId = computed(() => route.query.user_id ? Number(route.query.user_id) : 0)
 </script>
 
 <template>
@@ -182,13 +325,13 @@ onMounted(() => {
           </el-col>
           <!-- 右侧资源浏览区 -->
           <el-col :span="collapsed ? 23 : 18">
-            <el-card class="resource-viewer">
+            <el-card class="resource-viewer" @mouseenter="handleMouseEnter" @mouseleave="handleMouseLeave">
               <template v-if="selectedResource">
                 <template v-if="selectedResource.res_type === 'pdf'">
                   <iframe :src="selectedResource.resource_url" width="100%" height="600px" style="border:none;" />
                 </template>
                 <template v-else-if="selectedResource.res_type === 'video'">
-                  <video :src="selectedResource.resource_url" width="100%" height="600px" controls style="background:#000" />
+                  <video ref="videoPlayer" :src="selectedResource.resource_url" width="100%" height="600px" controls style="background:#000" />
                 </template>
                 <template v-else-if="selectedResource.res_type === 'word'">
                   <div style="text-align:center;margin-top:20px">
