@@ -40,10 +40,10 @@ import { ElMessage } from 'element-plus'
 const router = useRouter()
 const route = useRoute()
 
-// 存储从路由中获取的参数
+const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
 const routeParams = ref({
-  user_id: route.query.user_id || '',
-  name: route.query.name || ''
+  user_id: route.query.user_id || userInfo.user_id || '',
+  name: route.query.name || userInfo.name || ''
 })
 
 // 课程数据（初始为空数组）
@@ -125,8 +125,8 @@ const goBack = () => {
 onMounted(() => {
   // 更新路由参数
   routeParams.value = {
-    user_id: route.query.user_id || '',
-    name: route.query.name || ''
+    user_id: route.query.user_id || userInfo.user_id || '',
+    name: route.query.name || userInfo.name || ''
   }
 
   // 获取课程数据

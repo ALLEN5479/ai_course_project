@@ -99,7 +99,11 @@ const route = useRoute()
 // 获取学生真实姓名
 const studentName = ref(route.query.name || '学生')
 // 获取user_id
-const userId = ref(route.query.user_id || '')
+const userId = ref(
+  route.query.user_id ||
+  (JSON.parse(localStorage.getItem('userInfo') || '{}').user_id) ||
+  ''
+)
 
 // 课程数据
 const courses = ref<any[]>([])

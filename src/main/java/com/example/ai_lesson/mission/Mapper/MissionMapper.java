@@ -19,8 +19,8 @@ public interface MissionMapper {
             "teaching_class AS teachingClass, " +
             "DATE_FORMAT(start_time, '%Y-%m-%d %H:%i:%s') AS start_time, " +
             "DATE_FORMAT(end_time, '%Y-%m-%d %H:%i:%s') AS end_time, " +
-            "contents AS contents, " +
-            "mission_description AS missionDescription " +
+            "content AS content, " +
+            "mission_description AS missionDescription, " +
             "state AS state " +
             "FROM mission " +
             "<where>" +
@@ -52,6 +52,24 @@ public interface MissionMapper {
                          @Param("teachingClass") String teachingClass);
 
     /**
+     * 根据任务ID查询任务详情
+     */
+    @Select("SELECT " +
+            "mission_id AS missionId, " +
+            "teacher_id AS teacherId, " +
+            "mission_name AS missionName, " +
+            "mission_type AS missionType, " +
+            "teaching_class AS teachingClass, " +
+            "DATE_FORMAT(start_time, '%Y-%m-%d %H:%i:%s') AS start_time, " +
+            "DATE_FORMAT(end_time, '%Y-%m-%d %H:%i:%s') AS end_time, " +
+            "content AS content, " +
+            "mission_description AS missionDescription, " +
+            "state AS state " +
+            "FROM mission " +
+            "WHERE mission_id = #{missionId}")
+    Mission selectMissionById(@Param("missionId") Integer missionId);
+
+    /**
      * 根据任务状态查询任务列表（用于任务界面）
      */
     @Select("<script>" +
@@ -74,7 +92,7 @@ public interface MissionMapper {
             "VALUES (#{missionName}, #{missionType}, #{teachingClass}, " +
             "#{start_time,jdbcType=TIMESTAMP}, #{end_time,jdbcType=TIMESTAMP}, " +
             "#{content}, #{missionDescription})")
-    int insertMission(Mission mission);
+    int insertMission(@Param("mission") Mission mission);
     /**
      * 修改任务
      */
@@ -87,13 +105,12 @@ public interface MissionMapper {
             "content = #{content}, " +
             "mission_description = #{missionDescription} " +
             "WHERE mission_id = #{missionId}")
-    int updateMission(Mission mission);
+    int updateMission(@Param("mission") Mission mission);
 
     /**
      * 删除任务
      */
     @Delete("DELETE FROM mission WHERE mission_id = #{missionId}")
     int deleteMissionById(@Param("missionId") Integer missionId);
-
-    Mission selectMissionById(Integer missionId);
 }
+

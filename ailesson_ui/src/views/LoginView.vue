@@ -221,14 +221,13 @@ const handleLogin = async () => {
         password: loginForm.password
       }
     })
-    const user = res.data
-    if (user && user.user_id) {
-      // 登录成功，根据type跳转
-      if (user.type === 1) {
-        ElMessage.success(`欢迎学生 ${user.name} 登录！`)
-        router.push({ path: '/student/dashboard', query: { name: user.name, user_id: user.user_id } })
-      } else if (user.type === 2) {
-        ElMessage.success(`欢迎教师 ${user.name} 登录！`)
+    if (res.data.code === 200) {
+      localStorage.setItem('userInfo', JSON.stringify(res.data.data))
+      if (res.data.data.type === 1) {
+        ElMessage.success(`欢迎学生 ${res.data.data.name} 登录！`)
+        router.push({ path: '/student/dashboard', query: { name: res.data.data.name, user_id: res.data.data.user_id } })
+      } else if (res.data.data.type === 2) {
+        ElMessage.success(`欢迎教师 ${res.data.data.name} 登录！`)
         router.push({ 
           path: '/teacher/dashboard', 
           query: { 

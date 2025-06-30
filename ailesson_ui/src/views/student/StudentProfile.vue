@@ -8,24 +8,27 @@
         </div>
       </el-header>
       <el-main class="main-content">
-        <el-card class="profile-card">
-          <div class="profile-header">
-            <el-avatar :size="80" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" />
-            <div class="profile-info">
-              <h2>张三</h2>
-              <p>学号：20240001</p>
-              <p>已选课程：3门</p>
+        <div class="profile-wrapper">
+          <el-card class="profile-card">
+            <div class="profile-header">
+              <el-avatar :size="80" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" />
+              <div class="profile-info">
+                <h2>{{ userInfo.name }}</h2>
+                <p>学号：{{ userInfo.user_id }}</p>
+                <p>已选课程：{{ userInfo.courseCount }}门</p>
+              </div>
             </div>
-          </div>
-          <div class="profile-courses">
-            <h3>已选课程</h3>
-            <ul>
-              <li>数据结构与算法</li>
-              <li>计算机网络</li>
-              <li>操作系统</li>
-            </ul>
-          </div>
-        </el-card>
+            <div class="profile-courses">
+              <h3>已选课程</h3>
+              <!-- <ul>
+                <li v-for="course in userInfo.courses" :key="course">{{ course }}</li>
+              </ul> -->
+            </div>
+            <div style="display: flex; justify-content: center;">
+              <AbilityRadarChart :userId="userId" />
+            </div>
+          </el-card>
+        </div>
       </el-main>
     </el-container>
   </div>
@@ -33,10 +36,27 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import AbilityRadarChart from './ability/AbilityRadarChart.vue'
+import { ref, onMounted } from 'vue'
+
 const router = useRouter()
 const goBack = () => {
   router.push('/student/dashboard')
 }
+
+// 读取用户信息
+const userInfo = ref({ name: '', user_id: '', courseCount: 0 })
+
+onMounted(() => {
+  const info = localStorage.getItem('userInfo')
+  if (info) {
+    userInfo.value = JSON.parse(info)
+  }
+})
+
+const userId = userInfo.value.user_id || 
+  (JSON.parse(localStorage.getItem('userInfo') || '{}').user_id) || 
+  ''
 </script>
 
 <style scoped>
@@ -62,12 +82,35 @@ const goBack = () => {
   font-size: 24px;
 }
 .main-content {
-  padding: 30px;
+  width: 100vw;
+  min-height: 100vh;
+  padding: 0;
+  position: static;
+}
+.profile-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  position: static;
+  top: unset;
+  right: unset;
 }
 .profile-card {
-  max-width: 500px;
-  margin: 0 auto;
-  padding: 30px 40px;
+  width: 100%;
+  max-width: none;
+  padding: 40px 60px;
+  min-height: 600px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+.ability-btn-wrapper {
+  margin-top: 16px;
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
 }
 .profile-header {
   display: flex;

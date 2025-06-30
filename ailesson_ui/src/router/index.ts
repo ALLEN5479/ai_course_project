@@ -109,7 +109,7 @@ const router = createRouter({
         {
           path: 'ability-map/:studentId',
           name: 'teacher-ability-map',
-          component: () => import('../views/student/AbilityMap.vue'),
+          component: () => import('../views/student/ability/index.vue'),
         },
         {
           path: 'knowledge-graph',
@@ -144,7 +144,7 @@ const router = createRouter({
         {
           path: 'class-task-manager',
           name: 'teacher-class-task-manager',
-          component: () => import('../views/teacher/ClassTaskManager.vue'),
+          component: () => import('../views/teacher/TaskManager.vue'),
         },
         {
           path: 'task-grading',
@@ -157,12 +157,6 @@ const router = createRouter({
           component: () => import('../views/teacher/CourseSubmissionList.vue'),
         },
       ]
-    },
-
-    {
-      path: '/ability/detail',
-      name: 'ability-detail',
-      component: () => import('../views/ability/detail.vue')
     },
     {
       path: '/student/ability',
