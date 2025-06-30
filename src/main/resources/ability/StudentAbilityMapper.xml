@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.ai_lesson.ability.Mapper.StudentAbilityMapper">
+    <resultMap id="StudentAbilityMap" type="com.example.ai_lesson.ability.Domain.StudentAbility">
+        <id property="id" column="id"/>
+        <result property="studentId" column="student_id"/>
+        <result property="studentName" column="student_name"/>
+        <result property="programmingScore" column="programming_score"/>
+        <result property="aiScore" column="ai_score"/>
+        <result property="mathScore" column="math_score"/>
+        <result property="creativityScore" column="creativity_score"/>
+        <result property="communicationScore" column="communication_score"/>
+        <result property="abilityType" column="ability_type"/>
+        <result property="eloScore" column="elo_score"/>
+        <result property="kFactor" column="k_factor"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+    <select id="selectStudentAbilityByStudentId" resultMap="StudentAbilityMap">
+        SELECT id, student_id, student_name, programming_score, ai_score, math_score, 
+               creativity_score, communication_score, ability_type, elo_score, k_factor,
+               create_time, update_time
+        FROM student_ability
+        WHERE student_id = #{studentId}
+    </select>
+    <select id="selectStudentAbilityById" resultMap="StudentAbilityMap">
+        SELECT id, student_id, student_name, programming_score, ai_score, math_score, 
+               creativity_score, communication_score, ability_type, elo_score, k_factor,
+               create_time, update_time
+        FROM student_ability
+        WHERE student_id = #{studentId}
+        LIMIT 1
+    </select>
+    <select id="selectAllStudentsAbility" resultMap="StudentAbilityMap">
+        SELECT id, student_id, student_name, programming_score, ai_score, math_score, 
+               creativity_score, communication_score, ability_type, elo_score, k_factor,
+               create_time, update_time
+        FROM student_ability
+        ORDER BY student_id
+    </select>
+    <select id="selectGrammarRecordsByStudentId" resultType="com.example.ai_lesson.aiquestion.entity.QuizAnswerRecord">
+        SELECT
+            difficulty,
+            is_correct AS isCorrect,
+            question_id AS questionId,
+            student_id AS studentId,
+            ability_type AS abilityType,
+            score,
+            used_time AS usedTime
+        FROM
+            quiz_answer_record
+        WHERE
+            student_id = #{studentId}
+        ORDER BY submit_time
+    </select>
+    <insert id="insertQuestionRecord" parameterType="com.example.ai_lesson.aiquestion.entity.QuizAnswerRecord">
+        INSERT INTO question_record
+        (student_id, question_id, course_id, is_correct, answer, used_time, score, difficulty, ability_type)
+        VALUES
+        (#{studentId}, #{questionId}, #{courseId}, #{isCorrect}, #{answer}, #{usedTime}, #{score}, #{difficulty}, #{abilityType})
+    </insert>
+    <select id="selectRecordsByStudentIdAndAbilityType" resultType="com.example.ai_lesson.aiquestion.entity.QuizAnswerRecord">
+        SELECT * FROM question_record
+        WHERE student_id = #{studentId} AND ability_type = #{abilityType}
+        ORDER BY create_time
+    </select>
+    <insert id="insertStudentAbility" parameterType="com.example.ai_lesson.ability.Domain.StudentAbility">
+        INSERT INTO student_ability
+        (student_id, student_name, programming_score, ai_score, math_score, creativity_score, 
+         communication_score, ability_type, elo_score, k_factor, create_time, update_time)
+        VALUES
+        (#{studentId}, #{studentName}, #{programmingScore}, #{aiScore}, #{mathScore}, #{creativityScore},
+         #{communicationScore}, #{abilityType}, #{eloScore}, #{kFactor}, #{createTime}, #{updateTime})
+    </insert>
+    <update id="updateStudentAbility" parameterType="com.example.ai_lesson.ability.Domain.StudentAbility">
+        UPDATE student_ability
+        SET student_name = #{studentName},
+            programming_score = #{programmingScore},
+            ai_score = #{aiScore},
+            math_score = #{mathScore},
+            creativity_score = #{creativityScore},
+            communication_score = #{communicationScore},
+            ability_type = #{abilityType},
+            elo_score = #{eloScore},
+            k_factor = #{kFactor},
+            update_time = #{updateTime}
+        WHERE student_id = #{studentId}
+    </update>
+    <delete id="deleteStudentAbilityByStudentId">
+        DELETE FROM student_ability WHERE student_id = #{studentId}
+    </delete>
+    <select id="selectStudentAbilityByStudentIdAndAbilityType" resultMap="StudentAbilityMap">
+        SELECT * FROM student_ability
+        WHERE student_id = #{studentId} AND ability_type = #{abilityType}
+        LIMIT 1
+    </select>
+</mapper>
