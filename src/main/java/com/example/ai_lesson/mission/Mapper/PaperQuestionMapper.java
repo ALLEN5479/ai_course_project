@@ -4,6 +4,7 @@ import com.example.ai_lesson.mission.Domain.PaperQuestion;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface PaperQuestionMapper {
@@ -36,4 +37,18 @@ public interface PaperQuestionMapper {
             "</foreach>" +
             "</script>")
     int batchInsert(@Param("paperQuestions") List<PaperQuestion> paperQuestions);
+    
+    @Select("SELECT q.id, q.question_text as content, q.option_a, q.option_b, q.option_c, q.option_d, q.category, q.difficulty, pq.score, pq.question_type as type FROM questions q JOIN paper_question pq ON q.id = pq.question_id WHERE q.id = #{questionId} LIMIT 1")
+    Map<String, Object> findQuestionDetailById(Integer questionId);
+    
+    @Select({
+      "<script>",
+      "SELECT q.id, q.question_text as content, q.option_a, q.option_b, q.option_c, q.option_d, q.category, q.difficulty, pq.score, pq.question_type as type",
+      "FROM questions q",
+      "JOIN paper_question pq ON q.id = pq.question_id",
+      "WHERE pq.paper_id = #{paperId}",
+      "ORDER BY pq.sort_order",
+      "</script>"
+    })
+    List<Map<String, Object>> findQuestionDetailsByPaperId(@Param("paperId") Integer paperId);
 } 

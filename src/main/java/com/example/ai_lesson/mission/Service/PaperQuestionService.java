@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class PaperQuestionService {
@@ -40,5 +41,9 @@ public class PaperQuestionService {
     
     public boolean batchCreatePaperQuestions(List<PaperQuestion> paperQuestions) {
         return paperQuestionMapper.batchInsert(paperQuestions) > 0;
+    }
+    
+    public Map<String, Object> getQuestionDetailById(Integer questionId) {
+        return paperQuestionMapper.findQuestionDetailById(questionId);
     }
 } 

@@ -5,6 +5,7 @@ public class Paper {
     private String paperName;
     private String paperDescription;
     private Integer totalScore;
+    private Integer courseId;
 
     // 构造函数
     public Paper() {}
@@ -48,6 +49,14 @@ public class Paper {
         this.totalScore = totalScore;
     }
 
+    public Integer getCourseId() {
+        return courseId;
+    }
+
+    public void setCourseId(Integer courseId) {
+        this.courseId = courseId;
+    }
+
     @Override
     public String toString() {
         return "Paper{" +
@@ -55,6 +64,7 @@ public class Paper {
                ", paperName='" + paperName + '\'' +
                ", paperDescription='" + paperDescription + '\'' +
                ", totalScore=" + totalScore +
+               ", courseId=" + courseId +
                '}';
     }
 }

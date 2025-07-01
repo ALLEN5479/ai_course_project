@@ -202,4 +202,26 @@ export const paperQuestionApi = {
     const response = await axios.put(`${BASE_URL}/api/paper-questions/${data.id}`, data)
     return response.data
   }
+}
+
+// 知识点API
+export const knowledgeApi = {
+  // 获取所有知识点（树状结构）
+  getAllNodes: async () => {
+    try {
+      console.log('[knowledgeApi] 开始请求知识点数据...')
+      const response = await axios.get(`${BASE_URL}/api/nodes/all`)
+      console.log('[knowledgeApi] 请求成功:', response)
+      return response.data
+    } catch (error: any) {
+      console.error('[knowledgeApi] 请求失败:', error)
+      console.error('[knowledgeApi] 错误详情:', {
+        message: error.message,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data
+      })
+      throw error
+    }
+  }
 } 
