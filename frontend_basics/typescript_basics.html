@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TypeScript基础学习</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .section { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; }
+        .output { background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; margin: 10px 0; }
+        .code { background-color: #f1f3f4; padding: 10px; border-radius: 4px; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <h1>TypeScript基础学习</h1>
+
+    <div class="section">
+        <h2>1. 基本类型</h2>
+        <div class="code">
+// 基本类型定义
+let name: string = "张三";
+let age: number = 25;
+let isStudent: boolean = true;
+let hobbies: string[] = ["读书", "游泳"];
+let person: { name: string; age: number } = { name: "李四", age: 30 };
+        </div>
+        <div id="basic-types-output" class="output"></div>
+    </div>
+
+    <div class="section">
+        <h2>2. 接口 (Interface)</h2>
+        <div class="code">
+interface Student {
+    id: number;
+    name: string;
+    age: number;
+    major?: string; // 可选属性
+}
+
+let student: Student = {
+    id: 1,
+    name: "王五",
+    age: 20
+};
+        </div>
+        <div id="interface-output" class="output"></div>
+    </div>
+
+    <div class="section">
+        <h2>3. 函数类型</h2>
+        <div class="code">
+// 函数类型定义
+function add(a: number, b: number): number {
+    return a + b;
+}
+
+// 箭头函数类型
+const multiply: (a: number, b: number) => number = (a, b) => a * b;
+
+// 可选参数和默认参数
+function greet(name: string, greeting: string = "你好"): string {
+    return `${greeting}, ${name}!`;
+}
+        </div>
+        <div id="function-output" class="output"></div>
+    </div>
+
+    <div class="section">
+        <h2>4. 泛型 (Generics)</h2>
+        <div class="code">
+// 泛型函数
+function identity&lt;T&gt;(arg: T): T {
+    return arg;
+}
+
+// 泛型接口
+interface Box&lt;T&gt; {
+    content: T;
+}
+
+let numberBox: Box&lt;number&gt; = { content: 42 };
+let stringBox: Box&lt;string&gt; = { content: "hello" };
+        </div>
+        <div id="generic-output" class="output"></div>
+    </div>
+
+    <div class="section">
+        <h2>5. 联合类型和类型守卫</h2>
+        <div class="code">
+// 联合类型
+type Status = "loading" | "success" | "error";
+
+// 类型守卫
+function processValue(value: string | number): string {
+    if (typeof value === "string") {
+        return value.toUpperCase();
+    } else {
+        return value.toString();
+    }
+}
+        </div>
+        <div id="union-output" class="output"></div>
+    </div>
+
+    <script>
+        // 注意：这是JavaScript代码，用于演示TypeScript概念
+        // 在实际项目中，这些代码需要用TypeScript编译器编译
+
+        // 1. 基本类型演示
+        function showBasicTypes() {
+            let name = "张三";
+            let age = 25;
+            let isStudent = true;
+            let hobbies = ["读书", "游泳"];
+            let person = { name: "李四", age: 30 };
+
+            let output = `
+                <p>字符串: ${name} (类型: ${typeof name})</p>
+                <p>数字: ${age} (类型: ${typeof age})</p>
+                <p>布尔值: ${isStudent} (类型: ${typeof isStudent})</p>
+                <p>数组: ${hobbies} (类型: ${typeof hobbies})</p>
+                <p>对象: ${JSON.stringify(person)} (类型: ${typeof person})</p>
+            `;
+            
+            document.getElementById('basic-types-output').innerHTML = output;
+        }
+
+        // 2. 接口演示
+        function showInterface() {
+            let student = {
+                id: 1,
+                name: "王五",
+                age: 20
+            };
+
+            let output = `
+                <p>学生信息: ${JSON.stringify(student, null, 2)}</p>
+                <p>在TypeScript中，这个对象必须符合Student接口的定义</p>
+            `;
+            
+            document.getElementById('interface-output').innerHTML = output;
+        }
+
+        // 3. 函数类型演示
+        function showFunctionTypes() {
+            function add(a, b) {
+                return a + b;
+            }
+
+            const multiply = (a, b) => a * b;
+
+            function greet(name, greeting = "你好") {
+                return `${greeting}, ${name}!`;
+            }
+
+            let output = `
+                <p>add(5, 3) = ${add(5, 3)}</p>
+                <p>multiply(4, 6) = ${multiply(4, 6)}</p>
+                <p>greet("小明") = ${greet("小明")}</p>
+                <p>greet("小红", "早上好") = ${greet("小红", "早上好")}</p>
+            `;
+            
+            document.getElementById('function-output').innerHTML = output;
+        }
+
+        // 4. 泛型演示
+        function showGenerics() {
+            function identity(arg) {
+                return arg;
+            }
+
+            let numberBox = { content: 42 };
+            let stringBox = { content: "hello" };
+
+            let output = `
+                <p>identity("hello") = ${identity("hello")}</p>
+                <p>identity(123) = ${identity(123)}</p>
+                <p>numberBox: ${JSON.stringify(numberBox)}</p>
+                <p>stringBox: ${JSON.stringify(stringBox)}</p>
+            `;
+            
+            document.getElementById('generic-output').innerHTML = output;
+        }
+
+        // 5. 联合类型演示
+        function showUnionTypes() {
+            function processValue(value) {
+                if (typeof value === "string") {
+                    return value.toUpperCase();
+                } else {
+                    return value.toString();
+                }
+            }
+
+            let output = `
+                <p>processValue("hello") = ${processValue("hello")}</p>
+                <p>processValue(123) = ${processValue(123)}</p>
+            `;
+            
+            document.getElementById('union-output').innerHTML = output;
+        }
+
+        // 页面加载时执行所有演示
+        window.onload = function() {
+            showBasicTypes();
+            showInterface();
+            showFunctionTypes();
+            showGenerics();
+            showUnionTypes();
+        };
+    </script>
+</body>
+</html> 
