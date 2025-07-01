@@ -5,7 +5,7 @@
         <div class="header-content">
           <h1>学生端 - 智能课程系统</h1>
           <div class="user-info">
-            <el-avatar :size="40" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" />
+            <el-avatar :size="40" :src="avatarUrl" style="cursor:pointer" @click="goToPersonal" />
             <span class="username">{{ studentName }}</span>
             <el-button type="text" @click="logout">退出登录</el-button>
           </div>
@@ -108,6 +108,8 @@ const userId = ref(
 // 课程数据
 const courses = ref<any[]>([])
 
+const avatarUrl = ref("https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png")
+
 const navigateWithParams = (path: string, additionalParams: Record<string, any> = {}) => {
   router.push({
     path,
@@ -118,8 +120,26 @@ const navigateWithParams = (path: string, additionalParams: Record<string, any> 
   })
 }
 
+const goToPersonal = () => {
+  router.push({
+    path: '/student/personal',
+    query: {
+      user_id: userId.value,
+      name: studentName.value
+    }
+  })
+}
+
 const goToCourses = () => navigateWithParams('/student/courses')
-const goToProfile = () => navigateWithParams('/student/profile')
+const goToProfile = () => {
+  router.push({
+    path: '/student/profile',
+    query: {
+      user_id: userId.value,
+      name: studentName.value
+    }
+  })
+}
 const goToSelfStudy = () => navigateWithParams('/student/self-study')
 const goToCourse = (courseId: number) => {
   const course = courses.value.find(c => c.course_id === courseId)

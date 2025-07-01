@@ -42,13 +42,13 @@ const router = createRouter({
         {
           path: 'learning',
           name: 'student-learning',
-          component: () => import('../views/student/LearningView.vue'),
+          component: () => import('../views/student/StudentLearningLayout.vue'),
         },
-        {
-          path: 'learning/:courseId',
-          name: 'student-learning-with-course',
-          component: () => import('../views/student/LearningView.vue'),
-        },
+        //旧版的课程总览页面 {
+        //   path: 'learning/:courseId',
+        //   name: 'student-learning-with-course',
+        //   component: () => import('../views/student/LearningView.vue'),
+        // },
         {
           path: 'missions',
           name: 'student-missions',
@@ -79,6 +79,11 @@ const router = createRouter({
         //   name: 'student-self-study',
         //   component: () => import('../views/student/SelfStudy.vue'),
         // }
+        {
+          path: 'personal',
+          name: 'student-personal',
+          component: () => import('../views/student/StudentPersonal.vue'),
+        },
       ]
     },
     {

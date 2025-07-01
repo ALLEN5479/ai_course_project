@@ -231,8 +231,8 @@ const handleLogin = async () => {
         router.push({ 
           path: '/teacher/dashboard', 
           query: { 
-            teacherId: user.user_id, 
-            teacherName: user.name 
+            teacherId: loginForm.userNumber,
+            teacherName: loginForm.password
           } 
         })
       } else {
