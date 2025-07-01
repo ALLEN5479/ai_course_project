@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, watch } from 'vue'
+import { computed, ref, onMounted, watch, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { Document, VideoCamera, Files, Monitor, ArrowLeft, ArrowRight } from '@element-plus/icons-vue'
 import axios from 'axios'
+
 
 const router = useRouter()
 const route = useRoute()
@@ -115,6 +116,7 @@ onMounted(() => {
     loadResources(nodeId)
   }
 })
+
 </script>
 
 <template>
@@ -184,6 +186,7 @@ onMounted(() => {
           <el-col :span="collapsed ? 23 : 18">
             <el-card class="resource-viewer">
               <template v-if="selectedResource">
+
                 <template v-if="selectedResource.res_type === 'pdf'">
                   <iframe :src="selectedResource.resource_url" width="100%" height="600px" style="border:none;" />
                 </template>
@@ -218,6 +221,7 @@ onMounted(() => {
         </el-row>
       </el-main>
     </el-container>
+
   </div>
 </template>
 

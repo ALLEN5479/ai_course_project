@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import LoginView from '../views/LoginView.vue'
 import QuizVew from "@/views/teacher/QuizVew.vue";
 
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -144,7 +145,7 @@ const router = createRouter({
         {
           path: 'class-task-manager',
           name: 'teacher-class-task-manager',
-          component: () => import('../views/teacher/ClassTaskManager.vue'),
+          component: () => import('../views/teacher/TaskManager.vue'),
         },
         {
           path: 'task-grading',
@@ -162,7 +163,8 @@ const router = createRouter({
       path: '/quiz',
       name: 'quiz',
       component: QuizVew,
-    }],
+    },
+],
 
 })
 
