@@ -33,4 +33,8 @@ public class PaperService {
     public boolean deletePaper(Integer paperId) {
         return paperMapper.deleteById(paperId) > 0;
     }
+    
+    public List<Paper> getPapersByCourseId(Integer courseId) {
+        return paperMapper.findByCourseId(courseId);
+    }
 }

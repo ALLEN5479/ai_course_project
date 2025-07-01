@@ -8,68 +8,55 @@
         </div>
       </el-header>
       <el-main class="main-content">
-        <el-card class="profile-card">
-          <div class="profile-header">
-            <el-avatar :size="80" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" />
-            <div class="profile-info">
-              <h2>{{ studentName }}</h2> <!-- 使用路由参数中的姓名 -->
-              <p>学号：{{ studentId }}</p>
-              <p>已选课程：3门</p>
+        <div class="profile-wrapper">
+          <el-card class="profile-card">
+            <div class="profile-header">
+              <el-avatar :size="80" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" />
+              <div class="profile-info">
+                <h2>{{ userInfo.name }}</h2>
+                <p>学号：{{ userInfo.user_id }}</p>
+                <p>已选课程：{{ userInfo.courseCount }}门</p>
+              </div>
             </div>
-          </div>
-          <div class="profile-courses">
-            <h3>已选课程</h3>
-            <ul>
-              <li>数据结构与算法</li>
-              <li>计算机网络</li>
-              <li>操作系统</li>
-            </ul>
-          </div>
-        </el-card>
+            <div class="profile-courses">
+              <h3>已选课程</h3>
+              <!-- <ul>
+                <li v-for="course in userInfo.courses" :key="course">{{ course }}</li>
+              </ul> -->
+            </div>
+            <div style="display: flex; justify-content: center;">
+              <AbilityRadarChart :userId="userId" />
+            </div>
+          </el-card>
+        </div>
       </el-main>
     </el-container>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useRouter } from 'vue-router'
+import AbilityRadarChart from './ability/AbilityRadarChart.vue'
 import { ref, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router' // 添加 useRoute
 
 const router = useRouter()
-const route = useRoute() // 获取当前路由信息
-
-// 存储从路由中获取的参数
-const routeParams = ref({
-  user_id: route.query.user_id || '',
-  name: route.query.name || ''
-})
-
-// 学生信息（使用路由参数）
-const studentName = ref(route.query.name || '学生')
-const studentId = ref(route.query.user_id || '未获取学号')
-
-// 返回主页时保留参数
 const goBack = () => {
-  router.push({
-    path: '/student/dashboard',
-    query: {
-      ...routeParams.value // 保留当前所有参数
-    }
-  })
+  router.push('/student/dashboard')
 }
 
-// 监听路由参数变化
-onMounted(() => {
-  // 确保参数更新
-  routeParams.value = {
-    user_id: route.query.user_id || '',
-    name: route.query.name || ''
-  }
+// 读取用户信息
+const userInfo = ref({ name: '', user_id: '', courseCount: 0 })
 
-  // 更新学生信息
-  studentName.value = route.query.name || '学生'
-  studentId.value = route.query.user_id || '未获取学号'
+onMounted(() => {
+  const info = localStorage.getItem('userInfo')
+  if (info) {
+    userInfo.value = JSON.parse(info)
+  }
 })
+
+const userId = userInfo.value.user_id || 
+  (JSON.parse(localStorage.getItem('userInfo') || '{}').user_id) || 
+  ''
 </script>
 
 <style scoped>
@@ -95,12 +82,35 @@ onMounted(() => {
   font-size: 24px;
 }
 .main-content {
-  padding: 30px;
+  width: 100vw;
+  min-height: 100vh;
+  padding: 0;
+  position: static;
+}
+.profile-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  position: static;
+  top: unset;
+  right: unset;
 }
 .profile-card {
-  max-width: 500px;
-  margin: 0 auto;
-  padding: 30px 40px;
+  width: 100%;
+  max-width: none;
+  padding: 40px 60px;
+  min-height: 600px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+.ability-btn-wrapper {
+  margin-top: 16px;
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
 }
 .profile-header {
   display: flex;
@@ -132,4 +142,4 @@ onMounted(() => {
   font-size: 15px;
   margin-bottom: 4px;
 }
-</style>
+</style> 

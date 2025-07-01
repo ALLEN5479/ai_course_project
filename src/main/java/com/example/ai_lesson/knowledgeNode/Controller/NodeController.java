@@ -7,9 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/nodes")
+@CrossOrigin(origins = "*")
 public class NodeController {
     private final NodeService nodeService;
 
@@ -44,8 +47,32 @@ public class NodeController {
     }
 
     @GetMapping("/all")
-    public List<Node> getAllNodes() {
-        return nodeService.getAllNodes();
+    public Map<String, Object> getAllNodes() {
+        System.out.println("=== 知识点接口被调用 ===");
+        System.out.println("请求路径: /api/nodes/all");
+        
+        Map<String, Object> response = new HashMap<>();
+        try {
+            List<Node> nodes = nodeService.getAllNodes();
+            System.out.println("查询到知识点数量: " + (nodes != null ? nodes.size() : 0));
+            if (nodes != null) {
+                for (int i = 0; i < nodes.size(); i++) {
+                    Node node = nodes.get(i);
+                    System.out.println("知识点" + (i + 1) + ": ID=" + node.getId() + ", 名称=" + node.getName());
+                }
+            }
+            
+            response.put("success", true);
+            response.put("data", nodes);
+            response.put("message", "获取知识点列表成功");
+            System.out.println("=== 知识点接口调用完成 ===");
+        } catch (Exception e) {
+            System.err.println("获取知识点列表失败: " + e.getMessage());
+            e.printStackTrace();
+            response.put("success", false);
+            response.put("message", "获取知识点列表失败: " + e.getMessage());
+        }
+        return response;
     }
 
     @GetMapping("/subtree/{rootId}")

@@ -200,13 +200,70 @@
           <el-button @click="viewDialogVisible = false">关闭</el-button>
         </template>
       </el-dialog>
+      <el-dialog v-model="knowledgeDialogVisible" title="选择知识点" width="400px">
+        <el-tree
+          :data="knowledgeTree"
+          show-checkbox
+          node-key="id"
+          :default-checked-keys="checkedKnowledgeIds"
+          :props="{ label: 'name', children: 'children' }"
+          @check-change="(data: any, checked: boolean) => { if (data && data.id != null) { if (checked) checkedKnowledgeIds.push(data.id); else checkedKnowledgeIds.splice(checkedKnowledgeIds.indexOf(data.id), 1) } }"
+        />
+        <template #footer>
+          <el-button @click="knowledgeDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="confirmKnowledge">确定</el-button>
+        </template>
+      </el-dialog>
+      <el-dialog v-model="paperDialogVisible" title="选择试卷" width="600px">
+        <el-table :data="paperList" @selection-change="onSelectionChange" @row-click="(row: any) => selectedPaper = row" highlight-current-row>
+          <el-table-column type="selection" width="55" />
+          <el-table-column prop="paperName" label="试卷名称" />
+          <el-table-column prop="totalScore" label="总分" />
+          <el-table-column label="操作">
+            <template #default="scope">
+              <el-button @click.stop="previewPaperDetail(scope.row)">预览</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+        <template #footer>
+          <el-button @click="paperDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="confirmPaper">确定</el-button>
+        </template>
+      </el-dialog>
+      <el-dialog v-model="previewPaperVisible" title="试卷预览" width="600px" :show-close="false">
+        <div v-if="previewPaper">
+          <div>试卷名称：{{ previewPaper.paperName }}</div>
+          <div>总分：{{ previewPaper.totalScore }}</div>
+          <div v-if="previewPaperQuestions.length">
+            <h4>题目列表</h4>
+            <div v-for="(q, idx) in previewPaperQuestions" :key="q.id" style="margin-bottom: 12px;">
+              <div><b>{{ idx + 1 }}.</b> {{ q.content }}</div>
+              <div v-if="q.options">
+                <div v-for="opt in q.options" :key="opt.key">{{ opt.key }}. {{ opt.content }}</div>
+              </div>
+            </div>
+          </div>
+          <div v-else>暂无题目信息</div>
+        </div>
+        <template #footer>
+          <el-button @click="closePreviewPaper">取消</el-button>
+          <el-button type="primary" @click="closePreviewPaper">确定</el-button>
+        </template>
+      </el-dialog>
+      <el-dialog v-model="docDialogVisible" title="上传说明文档" width="400px">
+        <div>（此处为文件上传UI占位，后续补充上传功能）</div>
+        <template #footer>
+          <el-button @click="docDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="confirmDoc">确定</el-button>
+        </template>
+      </el-dialog>
     </div>
   </template>
   
   <script setup lang="ts">
   import { ref, computed, reactive, onMounted } from 'vue';
   import { ElMessage, ElMessageBox } from 'element-plus';
-  import { taskTemplateApi } from '@/api/taskApi';
+  import { taskTemplateApi, knowledgeApi, paperApi } from '@/api/taskApi';
   
   interface TaskTemplate {
     missionId: number;
@@ -274,33 +331,46 @@
     document: null as {name: string, content: string} | null
   });
   
+  const knowledgeDialogVisible = ref(false)
+  const paperDialogVisible = ref(false)
+  const knowledgeTree = ref<any[]>([])
+  const checkedKnowledgeIds = ref<number[]>([])
+  const paperList = ref<any[]>([])
+  const selectedPaper = ref<any>(null)
+  const previewPaper = ref<any>(null)
+  const previewPaperVisible = ref(false)
+  const previewPaperQuestions = ref<any[]>([])
+  const docDialogVisible = ref(false)
+  const selectedPapers = ref<any[]>([])
+  
   // 获取任务模板列表
   async function fetchTaskTemplates() {
     try {
       loading.value = true;
-      console.log('开始获取任务模板数据...');
+      //console.log('开始获取任务模板数据...');
       const response = await taskTemplateApi.getTaskTemplates();
-      console.log('API响应:', response);
-      
+      //console.log('API响应:', response);
+
       // 后端返回格式: { success: true, data: [...], message: "..." }
       if (response.success && response.data && Array.isArray(response.data)) {
         allTasks.value = response.data;
-        console.log('成功设置任务数据，总数:', allTasks.value.length);
+        //console.log('成功设置任务数据，总数:', allTasks.value.length);
         // 输出每个任务的信息用于调试
         allTasks.value.forEach((task, index) => {
-          console.log(`任务${index + 1}:`, {
+          //console.log(`任务${index + 1}:`,
+          /*{
             id: task.missionId,
             name: task.missionName,
             type: task.missionType,
             description: task.missionDescription
-          });
+          };*/
         });
       } else {
-        console.warn('API返回的数据格式不正确:', response);
+        //console.warn('API返回的数据格式不正确:', response);
         allTasks.value = [];
       }
     } catch (error) {
-      console.error('获取任务模板失败:', error);
+      //console.error('获取任务模板失败:', error);
       ElMessage.error('获取任务模板失败');
       allTasks.value = [];
     } finally {
@@ -316,7 +386,7 @@
             (t.createTime && t.createTime >= searchForm.value.createTimeRange[0] &&
                 t.createTime <= searchForm.value.createTimeRange[1]))
     );
-    console.log(`过滤后的${type}类型任务数量:`, filtered.length);
+    //console.log(`过滤后的${type}类型任务数量:`, filtered.length);
     return filtered;
   }
   
@@ -324,7 +394,7 @@
     const tasks = filteredTasks(type);
     const start = (page[type as keyof typeof page] - 1) * pageSize;
     const paged = tasks.slice(start, start + pageSize);
-    console.log(`${type}类型分页数据:`, paged);
+    //console.log(`${type}类型分页数据:`, paged);
     return paged;
   }
   
@@ -351,82 +421,190 @@
   }
   
   function onCreate() {
-    console.log('点击新建任务按钮');
-    console.log('createDialogVisible当前值:', createDialogVisible.value);
+    //console.log('点击新建任务按钮');
+    //console.log('createDialogVisible当前值:', createDialogVisible.value);
     createDialogVisible.value = true;
-    console.log('createDialogVisible设置后值:', createDialogVisible.value);
+    //console.log('createDialogVisible设置后值:', createDialogVisible.value);
     createForm.name = '';
     createForm.desc = '';
     createForm.type = '';
   }
   
   function cancelCreate() {
-    console.log('取消创建任务');
-    console.log('createDialogVisible当前值:', createDialogVisible.value);
+    //console.log('取消创建任务');
+    //console.log('createDialogVisible当前值:', createDialogVisible.value);
     createDialogVisible.value = false;
-    console.log('createDialogVisible设置后值:', createDialogVisible.value);
+    //console.log('createDialogVisible设置后值:', createDialogVisible.value);
     createForm.name = '';
     createForm.desc = '';
     createForm.type = '';
   }
   
   async function handleCreate() {
-    console.log('开始创建任务');
-    console.log('createForm数据:', createForm);
-    
     if (!createForm.name || !createForm.type) {
       ElMessage.warning('请填写任务名称和类型');
       return;
     }
-    
+    let content = ''
+    if (createForm.type === 'self') {
+      // 知识点名称用；拼接
+      const selected = getSelectedKnowledgeNames()
+      content = selected.join(';')
+    } else if (createForm.type === 'quiz') {
+      // 多选试卷id用分号拼接，修复只存一个id的问题
+      const ids = selectedPapers.value.length
+        ? selectedPapers.value.map((p: any) => JSON.parse(JSON.stringify(p)).paperId)
+        : []
+      content = ids.join(';')
+    } else if (createForm.type === 'report') {
+      content = '说明文档'
+    }
     try {
       const requestData = {
         missionName: createForm.name,
         missionDescription: createForm.desc,
         missionType: createForm.type,
-        content: createForm.desc, // 暂时用描述作为内容
-        teacherId: 1 // 临时设置，实际应该从用户信息中获取
-      };
-      
-      console.log('发送创建请求数据:', requestData);
-      const response = await taskTemplateApi.createTaskTemplate(requestData);
-      console.log('创建任务响应:', response);
-      
-      if (response.success) {
-        ElMessage.success('任务模板创建成功');
-        console.log('createDialogVisible当前值:', createDialogVisible.value);
-        createDialogVisible.value = false;
-        console.log('createDialogVisible设置后值:', createDialogVisible.value);
-        
-        // 重置表单
-        createForm.name = '';
-        createForm.desc = '';
-        createForm.type = '';
-        
-        // 重新加载数据
-        await fetchTaskTemplates();
-      } else {
-        ElMessage.error(response.message || '创建任务模板失败');
+        content,
+        teacherId: 1
       }
-    } catch (error) {
-      console.error('创建任务模板失败:', error);
-      ElMessage.error('创建任务模板失败');
+      const response = await taskTemplateApi.createTaskTemplate(requestData)
+      if (response.success) {
+        ElMessage.success('任务模板创建成功')
+        createDialogVisible.value = false
+        fetchTaskTemplates()
+        // 清空多选缓存，防止下次新建残留
+        selectedPapers.value = []
+      }
+    } catch (e) {
+      ElMessage.error('创建任务失败')
     }
   }
   
-  function addKnowledge() {
-    // 打开知识点选择弹窗或逻辑
-    ElMessage.info('添加知识点功能');
+  function getSelectedKnowledgeNames() {
+    // 根据checkedKnowledgeIds在knowledgeTree中查找名称
+    const names: string[] = []
+    function dfs(nodes: any[]) {
+      nodes.forEach(n => {
+        if (checkedKnowledgeIds.value.includes(n.id)) names.push(n.name)
+        if (n.children && n.children.length) dfs(n.children)
+      })
+    }
+    dfs(knowledgeTree.value)
+    return names
   }
   
-  function addPaper() {
-    // 打开试卷选择弹窗或逻辑
-    ElMessage.info('添加试卷功能');
+  async function addKnowledge() {
+    console.log('[addKnowledge] 开始添加知识点...')
+    console.log('[addKnowledge] knowledgeDialogVisible:', knowledgeDialogVisible.value)
+    console.log('[addKnowledge] knowledgeTree.length:', knowledgeTree.value.length)
+    
+    knowledgeDialogVisible.value = true
+    
+    if (!knowledgeTree.value.length) {
+      console.log('[addKnowledge] 知识点树为空，开始请求数据...')
+      try {
+        console.log('[addKnowledge] 调用knowledgeApi.getAllNodes()...')
+        const res = await knowledgeApi.getAllNodes()
+        console.log('[addKnowledge] knowledgeApi.getAllNodes() 返回结果:', res)
+        
+        if (res.success && Array.isArray(res.data)) {
+          console.log('[addKnowledge] 请求成功，数据长度:', res.data.length)
+          console.log('[addKnowledge] 原始数据:', res.data)
+          knowledgeTree.value = buildTree(res.data)
+          console.log('[addKnowledge] buildTree结果:', knowledgeTree.value)
+        } else {
+          console.error('[addKnowledge] 请求失败或数据格式错误:', res)
+        }
+      } catch (error: any) {
+        console.error('[addKnowledge] 请求异常:', error)
+        console.error('[addKnowledge] 错误详情:', {
+          message: error.message,
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data
+        })
+      }
+    } else {
+      console.log('[addKnowledge] 知识点树已有数据，跳过请求')
+    }
+  }
+  
+  function buildTree(nodes: any[]) {
+    console.log('[buildTree] 输入数据:', nodes)
+    
+    // 兼容后端返回的id/name/parentId，过滤掉id为null的节点
+    const mapped = nodes
+      .map((n: any) => ({
+        id: n.id ?? n.kg_id,
+        name: n.name ?? n.kg_name,
+        parentId: n.parentId ?? n.parent_id,
+        ...n
+      }))
+      .filter(n => n.id != null)
+    
+    console.log('[buildTree] mapped结果:', mapped)
+    
+    const idMap: Record<number, any> = {}
+    mapped.forEach(n => { idMap[n.id] = { ...n, children: [] } })
+    
+    console.log('[buildTree] idMap:', idMap)
+    
+    const tree: any[] = []
+    mapped.forEach(n => {
+      if (n.parentId && idMap[n.parentId]) {
+        idMap[n.parentId].children.push(idMap[n.id])
+        console.log(`[buildTree] 将节点 ${n.id}(${n.name}) 添加到父节点 ${n.parentId} 下`)
+      } else {
+        tree.push(idMap[n.id])
+        console.log(`[buildTree] 将节点 ${n.id}(${n.name}) 添加到根节点`)
+      }
+    })
+    
+    console.log('[buildTree] 最终树结构:', tree)
+    return tree
+  }
+  
+  function confirmKnowledge() {
+    knowledgeDialogVisible.value = false
+  }
+  
+  async function addPaper() {
+    paperDialogVisible.value = true
+    if (!paperList.value.length) {
+      const res = await paperApi.getPapers()
+      if (res.success && Array.isArray(res.data)) {
+        paperList.value = res.data
+      }
+    }
+  }
+  
+  function confirmPaper() {
+    paperDialogVisible.value = false
+  }
+  
+  async function previewPaperDetail(paper: any) {
+    //console.log('[previewPaperDetail] paper:', paper)
+    previewPaper.value = paper
+    previewPaperVisible.value = true
+    previewPaperQuestions.value = []
+    // 动态加载试卷详情
+    const res = await paperApi.getPaperDetail(paper.paperId || paper.id)
+    //console.log('[previewPaperDetail] getPaperDetail response:', res)
+    if (res.success && res.questions) {
+      previewPaperQuestions.value = res.questions
+      //console.log('[previewPaperDetail] questions:', res.questions)
+    } else {
+      //console.warn('[previewPaperDetail] no questions or request failed:', res)
+    }
+    //console.log('[previewPaperDetail] previewPaperQuestions:', previewPaperQuestions.value)
   }
   
   function addDoc() {
-    // 打开说明文档上传或编辑逻辑
-    ElMessage.info('添加说明文档功能');
+    docDialogVisible.value = true
+  }
+  
+  function confirmDoc() {
+    docDialogVisible.value = false
   }
   
   function editTask(task: TaskTemplate) {
@@ -460,24 +638,24 @@
         ElMessage.error(response.message || '更新任务模板失败');
       }
     } catch (error) {
-      console.error('更新任务模板失败:', error);
+      //console.error('更新任务模板失败:', error);
       ElMessage.error('更新任务模板失败');
     }
   }
   
   function editKnowledge() {
     // 修改知识点功能
-    ElMessage.info('修改知识点功能');
+    //console.info('修改知识点功能');
   }
   
   function editPaper() {
     // 修改试卷功能
-    ElMessage.info('修改试卷功能');
+    //console.info('修改试卷功能');
   }
   
   function editDoc() {
     // 修改说明文档功能
-    ElMessage.info('修改说明文档功能');
+    //console.info('修改说明文档功能');
   }
   
   async function viewTask(task: TaskTemplate) {
@@ -509,7 +687,7 @@
         ElMessage.error(response.message || '获取任务详情失败');
       }
     } catch (error) {
-      console.error('获取任务详情失败:', error);
+      //console.error('获取任务详情失败:', error);
       ElMessage.error('获取任务详情失败');
     }
   }
@@ -536,10 +714,20 @@
       }
     } catch (error) {
       if (error !== 'cancel') {
-        console.error('删除任务模板失败:', error);
+        //console.error('删除任务模板失败:', error);
         ElMessage.error('删除任务模板失败');
       }
     }
+  }
+  
+  function closePreviewPaper() {
+    previewPaperVisible.value = false
+    previewPaper.value = null
+    previewPaperQuestions.value = []
+  }
+  
+  function onSelectionChange(rows: any[]) {
+    selectedPapers.value = rows
   }
   
   // 生命周期

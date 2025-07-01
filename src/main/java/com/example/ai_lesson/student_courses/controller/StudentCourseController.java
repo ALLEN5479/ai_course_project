@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Collections;
 
 @RestController
 @CrossOrigin
@@ -25,7 +26,7 @@ public class StudentCourseController {
     public List<CourseEntity> getStudentCourses(@RequestParam String user_id) {
         List<StudentCourseEntity> studentCourses = studentCourseMapper.getStudentCoursesByUserId(user_id);
         List<Integer> courseIds = studentCourses.stream().map(StudentCourseEntity::getCourse_id).collect(Collectors.toList());
-        if (courseIds.isEmpty()) return List.of();
+        if (courseIds.isEmpty()) return Collections.emptyList();
         return courseMapper.getCoursesByIds(courseIds);
     }
 

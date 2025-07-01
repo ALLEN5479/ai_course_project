@@ -5,7 +5,7 @@
         <div class="header-content">
           <h1>学生端 - 智能课程系统</h1>
           <div class="user-info">
-            <el-avatar :size="40" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" />
+            <el-avatar :size="40" :src="avatarUrl" style="cursor:pointer" @click="goToPersonal" />
             <span class="username">{{ studentName }}</span>
             <el-button type="text" @click="logout">退出登录</el-button>
           </div>
@@ -90,9 +90,9 @@
     </button>
 
     <!-- AI聊天模态框 -->
-    <AiChatModal 
-      :isVisible="showChatModal" 
-      @close="showChatModal = false" 
+    <AiChatModal
+      :isVisible="showChatModal"
+      @close="showChatModal = false"
     />
   </div>
 </template>
@@ -103,7 +103,6 @@ import { useRouter, useRoute } from 'vue-router'
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import { Reading, DataAnalysis, Edit, Document } from '@element-plus/icons-vue'
-import AiChatModal from '../teacher/AiChatModal.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -111,13 +110,19 @@ const route = useRoute()
 // 获取学生真实姓名
 const studentName = ref(route.query.name || '学生')
 // 获取user_id
-const userId = ref(route.query.user_id || '')
+const userId = ref(
+  route.query.user_id ||
+  (JSON.parse(localStorage.getItem('userInfo') || '{}').user_id) ||
+  ''
+)
 
 // 课程数据
 const courses = ref<any[]>([])
 
 // AI聊天模态框状态
 const showChatModal = ref(false)
+
+const avatarUrl = ref("https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png")
 
 const navigateWithParams = (path: string, additionalParams: Record<string, any> = {}) => {
   router.push({
@@ -129,8 +134,26 @@ const navigateWithParams = (path: string, additionalParams: Record<string, any> 
   })
 }
 
+const goToPersonal = () => {
+  router.push({
+    path: '/student/personal',
+    query: {
+      user_id: userId.value,
+      name: studentName.value
+    }
+  })
+}
+
 const goToCourses = () => navigateWithParams('/student/courses')
-const goToProfile = () => navigateWithParams('/student/profile')
+const goToProfile = () => {
+  router.push({
+    path: '/student/profile',
+    query: {
+      user_id: userId.value,
+      name: studentName.value
+    }
+  })
+}
 const goToSelfStudy = () => navigateWithParams('/student/self-study')
 const goToCourse = (courseId: number) => {
   const course = courses.value.find(c => c.course_id === courseId)
@@ -377,4 +400,4 @@ onMounted(() => {
 .custom-file-btn:hover {
   box-shadow: 0 2px 8px rgba(28, 100, 242, 0.18);
 }
-</style> 
+</style>
