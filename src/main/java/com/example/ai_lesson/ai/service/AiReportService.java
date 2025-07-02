@@ -1,4 +1,5 @@
 package com.example.ai_lesson.ai.service;
 
-public class AiReportService {
+public interface AiReportService {
+    String getAiReport(String prompt);
 }

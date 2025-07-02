@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, watch, nextTick } from 'vue'
+
 import { computed, ref, onMounted, watch, nextTick, onBeforeUnmount } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { Document, VideoCamera, Files, Monitor, ArrowLeft, ArrowRight } from '@element-plus/icons-vue'
+import { Document, VideoCamera, Files, Monitor, ArrowLeft, ArrowRight, MagicStick } from '@element-plus/icons-vue'
 import axios from 'axios'
+import { ElMessage, ElLoading } from 'element-plus'
 
 
 const router = useRouter()
@@ -261,6 +262,65 @@ watch(selectedResource, async (newVal) => {
 })
 
 const userId = computed(() => route.query.user_id ? Number(route.query.user_id) : 0)
+
+// AI分析相关变量
+const showAiAnalysis = ref(false)
+const aiAnalysisResult = ref('')
+const aiAnalysisLoading = ref(false)
+const currentAnalyzingResource = ref<any>(null)
+
+// AI分析功能
+const analyzeResource = async () => {
+  if (!selectedResource.value) {
+    ElMessage.warning('请先选择一个资源')
+    return
+  }
+  
+  // 检查资源类型是否支持AI分析
+  if (selectedResource.value.res_type === 'video') {
+    ElMessage.warning('视频资源暂不支持AI分析')
+    return
+  }
+  
+  aiAnalysisLoading.value = true
+  currentAnalyzingResource.value = selectedResource.value
+  
+  try {
+    const response = await axios.get('http://localhost:8080/analyzeResource', {
+      params: { resource_id: selectedResource.value.resource_id }
+    })
+    
+    if (response.data.success) {
+      aiAnalysisResult.value = response.data.analysis
+      showAiAnalysis.value = true
+    } else {
+      ElMessage.error(response.data.message || 'AI分析失败')
+    }
+  } catch (error) {
+    console.error('AI分析失败:', error)
+    ElMessage.error('AI分析服务暂时不可用，请稍后重试')
+  } finally {
+    aiAnalysisLoading.value = false
+  }
+}
+
+// 关闭AI分析模态框
+const closeAiAnalysis = () => {
+  showAiAnalysis.value = false
+  aiAnalysisResult.value = ''
+  currentAnalyzingResource.value = null
+}
+
+// 格式化AI分析结果
+const formatAnalysisResult = (content: string) => {
+  if (!content) return ''
+  
+  return content
+    .replace(/\n/g, '<br>')
+    .replace(/^(\d+\.\s*)/gm, '<strong>$1</strong>')
+    .replace(/^(主要内容概述|关键知识点|学习重点|学习建议|相关扩展知识)：/gm, '<h4>$1</h4>')
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+}
 </script>
 
 <template>
@@ -329,6 +389,21 @@ const userId = computed(() => route.query.user_id ? Number(route.query.user_id) 
           <!-- 右侧资源浏览区 -->
           <el-col :span="collapsed ? 23 : 18">
             <el-card class="resource-viewer" @mouseenter="handleMouseEnter" @mouseleave="handleMouseLeave">
+              <!-- AI分析按钮 -->
+              <div v-if="selectedResource" class="ai-analysis-header">
+                <h3>{{ selectedResource.resource_name }}</h3>
+                <el-button 
+                  type="primary" 
+                  :icon="MagicStick" 
+                  @click="analyzeResource"
+                  :loading="aiAnalysisLoading"
+                  :disabled="selectedResource.res_type === 'video'"
+                  class="ai-analysis-btn"
+                >
+                  {{ aiAnalysisLoading ? 'AI分析中...' : 'AI分析' }}
+                </el-button>
+              </div>
+              
               <template v-if="selectedResource">
 
                 <template v-if="selectedResource.res_type === 'pdf'">
@@ -365,6 +440,34 @@ const userId = computed(() => route.query.user_id ? Number(route.query.user_id) 
         </el-row>
       </el-main>
     </el-container>
+
+    <!-- AI分析结果模态框 -->
+    <el-dialog
+      v-model="showAiAnalysis"
+      title="AI资源分析"
+      width="70%"
+      :before-close="closeAiAnalysis"
+      class="ai-analysis-dialog"
+    >
+      <div v-if="currentAnalyzingResource" class="analysis-header">
+        <h4>分析资源：{{ currentAnalyzingResource.resource_name }}</h4>
+        <p class="resource-info">
+          类型：{{ currentAnalyzingResource.res_type }} | 
+          描述：{{ currentAnalyzingResource.res_description || '无描述' }}
+        </p>
+      </div>
+      
+      <div class="analysis-content">
+        <div class="analysis-result" v-html="formatAnalysisResult(aiAnalysisResult)"></div>
+      </div>
+      
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="closeAiAnalysis">关闭</el-button>
+          <el-button type="primary" @click="closeAiAnalysis">确定</el-button>
+        </span>
+      </template>
+    </el-dialog>
 
   </div>
 </template>
@@ -450,5 +553,90 @@ const userId = computed(() => route.query.user_id ? Number(route.query.user_id) 
 .empty-resources {
   padding: 20px;
   text-align: center;
+}
+
+/* AI分析相关样式 */
+.ai-analysis-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.ai-analysis-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 18px;
+}
+
+.ai-analysis-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  padding: 8px 16px;
+  font-weight: 500;
+}
+
+.ai-analysis-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.ai-analysis-dialog .el-dialog__body {
+  padding: 20px;
+}
+
+.analysis-header {
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.analysis-header h4 {
+  margin: 0 0 8px 0;
+  color: #333;
+  font-size: 16px;
+}
+
+.resource-info {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.analysis-content {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.analysis-result {
+  line-height: 1.6;
+  color: #333;
+}
+
+.analysis-result h4 {
+  color: #409EFF;
+  margin: 20px 0 10px 0;
+  font-size: 16px;
+  border-left: 3px solid #409EFF;
+  padding-left: 10px;
+}
+
+.analysis-result strong {
+  color: #333;
+  font-weight: 600;
+}
+
+.analysis-result code {
+  background: #f5f5f5;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  color: #e74c3c;
+}
+
+.analysis-result br {
+  margin-bottom: 8px;
 }
 </style>
