@@ -27,6 +27,9 @@
             <div style="display: flex; justify-content: center;">
               <AbilityRadarChart :userId="userId" />
             </div>
+            <el-button type="primary" @click="$router.push('/student/career-ability')" style="margin-top: 20px;">
+              查看专业能力图谱
+            </el-button>
           </el-card>
         </div>
       </el-main>
