@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import LoginView from '../views/LoginView.vue'
 import QuizVew from "@/views/teacher/QuizVew.vue";
 
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -39,11 +40,11 @@ const router = createRouter({
           name: 'student-knowledge-graph',
           component: () => import('../views/student/KnowledgeGraph.vue'),
         },
-        {
-          path: 'learning',
-          name: 'student-learning',
-          component: () => import('../views/student/StudentLearningLayout.vue'),
-        },
+        // {
+        //   path: 'learning',
+        //   name: 'student-learning',
+        //   component: () => import('../views/student/StudentLearningLayout.vue'),
+        // },
         //旧版的课程总览页面 {
         //   path: 'learning/:courseId',
         //   name: 'student-learning-with-course',
@@ -167,8 +168,14 @@ const router = createRouter({
       path: '/student/ability',
       name: 'StudentAbility',
       component: () => import('@/views/student/ability/index.vue')
+    },
+    {path: '/quiz',
+      name: 'quiz',
+      component: QuizVew,
     }
-  ],
+  ]
+
+
 })
 
 export default router

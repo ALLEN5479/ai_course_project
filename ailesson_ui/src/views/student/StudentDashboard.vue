@@ -83,6 +83,17 @@
         </div>
       </el-main>
     </el-container>
+
+    <!-- 悬浮AI助手按钮 -->
+    <button class="ai-float-btn" @click="showChatModal = true" title="AI智能助手">
+      <span class="ai-float-icon">🤖</span>
+    </button>
+
+    <!-- AI聊天模态框 -->
+    <AiChatModal
+      :isVisible="showChatModal"
+      @close="showChatModal = false"
+    />
   </div>
 </template>
 
@@ -92,6 +103,7 @@ import { useRouter, useRoute } from 'vue-router'
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import { Reading, DataAnalysis, Edit, Document } from '@element-plus/icons-vue'
+import AiChatModal from '../teacher/AiChatModal.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -107,6 +119,9 @@ const userId = ref(
 
 // 课程数据
 const courses = ref<any[]>([])
+
+// AI聊天模态框状态
+const showChatModal = ref(false)
 
 const avatarUrl = ref("https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png")
 
@@ -257,9 +272,10 @@ onMounted(() => {
 
 .dashboard-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 20px;
   margin-bottom: 40px;
+  align-items: start;
 }
 
 .dashboard-card {
@@ -267,6 +283,7 @@ onMounted(() => {
   transition: all 0.3s ease;
   border: none;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  height: fit-content;
 }
 
 .dashboard-card:hover {
@@ -341,4 +358,47 @@ onMounted(() => {
   font-size: 12px;
   color: #999;
 }
-</style> 
+
+.ai-float-btn {
+  position: fixed;
+  right: 32px;
+  bottom: 32px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  cursor: pointer;
+  z-index: 1002;
+  transition: box-shadow 0.2s, transform 0.2s, background 0.2s;
+}
+.ai-float-btn:hover {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.35);
+  transform: scale(1.08);
+}
+.ai-float-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.custom-file-btn {
+  background: linear-gradient(90deg, #1C64F2 0%, #67e8f9 100%);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+.custom-file-btn:hover {
+  box-shadow: 0 2px 8px rgba(28, 100, 242, 0.18);
+}
+</style>
