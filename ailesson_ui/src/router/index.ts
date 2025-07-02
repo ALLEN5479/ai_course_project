@@ -168,14 +168,13 @@ const router = createRouter({
       path: '/student/ability',
       name: 'StudentAbility',
       component: () => import('@/views/student/ability/index.vue')
-    }
-  ],
+    },
+    {
       path: '/quiz',
       name: 'quiz',
       component: QuizVew,
     },
-],
-
+  ],
 })
 
 export default router
