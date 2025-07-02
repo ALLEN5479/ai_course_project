@@ -235,7 +235,7 @@ const generateReport = async (student: any) => {
   try {
     const response = await generateAiReport(student.studentId)
     ElMessage.success('AI能力报告生成成功')
-    // 可以跳转到报告详情页面或显示报告内容
+    // 可选：弹窗展示报告内容
   } catch (error) {
     ElMessage.error('生成AI报告失败')
   }

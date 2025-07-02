@@ -41,6 +41,14 @@
         <div ref="radarChartRef" class="radar-chart"></div>
       </div>
 
+      <!-- AI报告 -->
+      <div class="ai-report-section" v-if="abilityData.aiReport">
+        <h3>AI能力报告</h3>
+        <el-card>
+          <div style="white-space: pre-line;">{{ abilityData.aiReport }}</div>
+        </el-card>
+      </div>
+
       <!-- 能力详情 -->
       <div class="ability-details">
         <h3>能力详情</h3>
@@ -51,7 +59,7 @@
                 <h4>课程能力</h4>
                 <span class="score">{{ abilityData.courseScore }}</span>
               </div>
-              <el-progress :percentage="abilityData.courseScore" :color="getScoreColor(abilityData.courseScore)" />
+              <el-progress :percentage="abilityData.courseScore || 0" :color="getScoreColor(abilityData.courseScore)" />
               <p class="description">{{ getAbilityDescription('course', abilityData.courseScore) }}</p>
             </el-card>
           </el-col>
@@ -162,26 +170,49 @@ const abilityData = ref({
   teamworkScore: 0,
   communicationScore: 0,
   totalScore: 0,
-  rank: 0
+  rank: 0,
+  aiReport: ''
 })
 
 // 方法
 const loadAbilityData = async () => {
-  loading.value = true
+  console.log('loadAbilityData 被调用')
+  const userId = localStorage.getItem('user_id') || ''
+  if (!userId) {
+    ElMessage.error('未获取到用户ID，请重新登录')
+    return
+  }
   try {
-    const userId = localStorage.getItem('user_id') || ''
-    const response: any = await getStudentCareerAbility(userId)
-    if (response && response.code === 200) {
-      studentInfo.value = response.data.studentInfo
-      abilityData.value = response.data.abilityData
-      // 初始化雷达图
+    const response = await getStudentCareerAbility(userId)
+    console.log('接口原始响应:', response)
+    if (response && response.code === 200 && response.data) {
+      const data = response.data
+      studentInfo.value = {
+        name: data.name,
+        studentId: data.studentId,
+        className: data.className
+      }
+      abilityData.value = {
+        courseScore: data.courseScore,
+        practiceScore: data.practiceScore,
+        qualityScore: data.qualityScore,
+        innovationScore: data.innovationScore,
+        teamworkScore: data.teamworkScore,
+        communicationScore: data.communicationScore,
+        totalScore: data.totalScore,
+        rank: data.rank,
+        aiReport: data.aiReport
+      }
       await nextTick()
       initRadarChart()
+      console.log('后端返回数据:', data)
+      console.log('页面变量:', abilityData.value)
+    } else {
+      ElMessage.error('加载能力数据失败')
     }
   } catch (error) {
+    console.log('catch error:', error)
     ElMessage.error('加载能力数据失败')
-  } finally {
-    loading.value = false
   }
 }
 

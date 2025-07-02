@@ -34,9 +34,10 @@
     <div class="template-download">
       <h4>Excel模板格式说明：</h4>
       <ul>
-        <li>第一行：学号、姓名、班级、课程能力、实践能力、综合素养、创新能力、团队协作、沟通表达</li>
+        <li>第一行：学号、姓名、班级、经历1、经历2、经历3 ...</li>
         <li>数据从第二行开始填写</li>
-        <li>能力分数范围：0-100</li>
+        <li>每个"经历"请填写学生的生涯/学习/社会实践等文本描述（如"参加ACM竞赛获奖"、"实习于华为"等）</li>
+        <li>系统将自动分析文本生成能力分数和AI能力报告</li>
         <li>学号必须与系统中已有学生学号一致</li>
       </ul>
       <el-button type="primary" @click="downloadTemplate">
@@ -127,22 +128,17 @@ const handleError = (error: any) => {
 }
 
 const downloadTemplate = () => {
-  // 创建模板数据
   const templateData = [
-    ['学号', '姓名', '班级', '课程能力', '实践能力', '综合素养', '创新能力', '团队协作', '沟通表达'],
-    ['2023001', '张三', '软件2301', '85', '78', '82', '75', '80', '85'],
-    ['2023002', '李四', '软件2301', '92', '88', '85', '90', '85', '88'],
-    ['2023003', '王五', '软件2302', '76', '82', '78', '70', '85', '80']
+    ['学号', '姓名', '班级', '经历1', '经历2', '经历3'],
+    ['2023001', '张三', '软件2301', '参加ACM竞赛获奖', '实习于华为', '担任班级干部'],
+    ['2023002', '李四', '软件2302', '参与开源项目', '志愿者服务', '发表论文']
   ]
-  
-  // 这里可以调用后端接口下载模板，或者前端生成
-  // 简单示例：创建一个下载链接
   const csvContent = templateData.map(row => row.join(',')).join('\n')
   const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' })
   const link = document.createElement('a')
   const url = URL.createObjectURL(blob)
   link.setAttribute('href', url)
-  link.setAttribute('download', '生涯能力数据模板.csv')
+  link.setAttribute('download', '生涯经历导入模板.csv')
   link.style.visibility = 'hidden'
   document.body.appendChild(link)
   link.click()

@@ -221,8 +221,10 @@ const handleLogin = async () => {
         password: loginForm.password
       }
     })
+    console.log('login response:', res)
     if (res.data.code === 200) {
       localStorage.setItem('userInfo', JSON.stringify(res.data.data))
+      localStorage.setItem('user_id', res.data.data.user_id)
       if (res.data.data.type === 1) {
         ElMessage.success(`欢迎学生 ${res.data.data.name} 登录！`)
         router.push({ path: '/student/dashboard', query: { name: res.data.data.name, user_id: res.data.data.user_id } })

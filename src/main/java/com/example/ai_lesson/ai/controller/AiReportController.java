@@ -1,6 +1,7 @@
 package com.example.ai_lesson.ai.controller;
 
 import com.example.ai_lesson.ai.service.AiReportService;
+import com.example.ai_lesson.ai.entity.AiResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,7 +13,7 @@ public class AiReportController {
     private AiReportService aiReportService;
 
     @PostMapping
-    public String getAiReport(@RequestBody String prompt) {
+    public AiResult getAiReport(@RequestBody String prompt) {
         return aiReportService.getAiReport(prompt);
     }
 } 
