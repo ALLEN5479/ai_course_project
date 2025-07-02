@@ -40,11 +40,11 @@ const router = createRouter({
           name: 'student-knowledge-graph',
           component: () => import('../views/student/KnowledgeGraph.vue'),
         },
-        {
-          path: 'learning',
-          name: 'student-learning',
-          component: () => import('../views/student/StudentLearningLayout.vue'),
-        },
+        // {
+        //   path: 'learning',
+        //   name: 'student-learning',
+        //   component: () => import('../views/student/StudentLearningLayout.vue'),
+        // },
         //旧版的课程总览页面 {
         //   path: 'learning/:courseId',
         //   name: 'student-learning-with-course',
