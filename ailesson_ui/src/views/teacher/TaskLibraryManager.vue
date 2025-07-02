@@ -92,6 +92,9 @@
           </el-form-item>
           <el-form-item v-if="createForm.type === 'report'">
             <el-button @click="addDoc">添加说明文档</el-button>
+            <div v-if="uploadedDocResourceIds.length > 0" style="margin-top: 8px; color: #67c23a; font-size: 12px;">
+              已上传 {{ uploadedDocResourceIds.length }} 个文档
+            </div>
           </el-form-item>
         </el-form>
         <template #footer>
@@ -250,11 +253,27 @@
           <el-button type="primary" @click="closePreviewPaper">确定</el-button>
         </template>
       </el-dialog>
-      <el-dialog v-model="docDialogVisible" title="上传说明文档" width="400px">
-        <div>（此处为文件上传UI占位，后续补充上传功能）</div>
+      <el-dialog v-model="docDialogVisible" title="上传说明文档" width="500px">
+        <el-upload
+          class="upload-demo"
+          drag
+          multiple
+          :auto-upload="false"
+          :on-change="handleDocFileChange"
+          :file-list="docFileList"
+          accept=".pdf,.doc,.txt"
+          :limit="10"
+          :on-remove="(file, fileList) => { docFileList.value = fileList }"
+        >
+          <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+          <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+          <template #tip>
+            <div class="el-upload__tip">支持 PDF、Word、TXT 格式文件，单个文件不超过10MB，最多上传10个文件</div>
+          </template>
+        </el-upload>
         <template #footer>
           <el-button @click="docDialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="confirmDoc">确定</el-button>
+          <el-button type="primary" @click="handleDocUpload">确认上传</el-button>
         </template>
       </el-dialog>
     </div>
@@ -264,6 +283,8 @@
   import { ref, computed, reactive, onMounted } from 'vue';
   import { ElMessage, ElMessageBox } from 'element-plus';
   import { taskTemplateApi, knowledgeApi, paperApi } from '@/api/taskApi';
+  import { UploadFilled } from '@element-plus/icons-vue';
+  import axios from 'axios';
   
   interface TaskTemplate {
     missionId: number;
@@ -342,6 +363,9 @@
   const previewPaperQuestions = ref<any[]>([])
   const docDialogVisible = ref(false)
   const selectedPapers = ref<any[]>([])
+  const docFileList = ref<any[]>([])
+  // 存储上传的文档资源ID
+  const uploadedDocResourceIds = ref<number[]>([])
   
   // 获取任务模板列表
   async function fetchTaskTemplates() {
@@ -438,6 +462,8 @@
     createForm.name = '';
     createForm.desc = '';
     createForm.type = '';
+    // 清空上传的文档资源ID
+    uploadedDocResourceIds.value = [];
   }
   
   async function handleCreate() {
@@ -447,9 +473,8 @@
     }
     let content = ''
     if (createForm.type === 'self') {
-      // 知识点名称用；拼接
-      const selected = getSelectedKnowledgeNames()
-      content = selected.join(';')
+      // 知识点id用；拼接
+      content = checkedKnowledgeIds.value.join(';')
     } else if (createForm.type === 'quiz') {
       // 多选试卷id用分号拼接，修复只存一个id的问题
       const ids = selectedPapers.value.length
@@ -457,7 +482,13 @@
         : []
       content = ids.join(';')
     } else if (createForm.type === 'report') {
-      content = '说明文档'
+      // 报告任务：将上传的文档resource_id用分号拼接
+      if (uploadedDocResourceIds.value.length > 0) {
+        content = uploadedDocResourceIds.value.join(';')
+      } else {
+        ElMessage.warning('请先上传说明文档');
+        return;
+      }
     }
     try {
       const requestData = {
@@ -474,6 +505,7 @@
         fetchTaskTemplates()
         // 清空多选缓存，防止下次新建残留
         selectedPapers.value = []
+        uploadedDocResourceIds.value = []
       }
     } catch (e) {
       ElMessage.error('创建任务失败')
@@ -601,6 +633,48 @@
   
   function addDoc() {
     docDialogVisible.value = true
+  }
+  
+  function handleDocFileChange(file: any, fileList: any[]) {
+    docFileList.value = fileList;
+  }
+  
+  async function handleDocUpload() {
+    if (docFileList.value.length === 0) {
+      ElMessage.warning('请先选择文件');
+      return;
+    }
+    
+    // 清空之前的资源ID
+    uploadedDocResourceIds.value = [];
+    
+    for (const fileObj of docFileList.value) {
+      const file = fileObj.raw;
+      const formData = new FormData();
+      formData.append('file', file);
+      try {
+        const response = await axios.post('http://localhost:8080/api/mission-resource/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+          withCredentials: true
+        });
+        
+        if (response.status === 200 && response.data.success) {
+          // 保存上传文件的resource_id
+          uploadedDocResourceIds.value.push(response.data.data.resourceId);
+          console.log('文件上传成功，resource_id:', response.data.data.resourceId);
+        } else {
+          ElMessage.error('文件上传失败: ' + (response.data?.message || '未知错误'));
+          return;
+        }
+      } catch (err: any) {
+        ElMessage.error('文件上传异常: ' + (err?.response?.data || err.message));
+        return;
+      }
+    }
+    
+    ElMessage.success(`成功上传 ${uploadedDocResourceIds.value.length} 个文件`);
+    docDialogVisible.value = false;
+    docFileList.value = [];
   }
   
   function confirmDoc() {
@@ -768,5 +842,19 @@
   .delete-btn:hover {
     background: #f5f7fa;
     border-color: #409EFF;
+  }
+  .upload-demo {
+    width: 100%;
+    margin-bottom: 16px;
+  }
+  .el-upload__text {
+    color: #606266;
+    font-size: 15px;
+    margin-top: 8px;
+  }
+  .el-upload__tip {
+    color: #909399;
+    font-size: 13px;
+    margin-top: 6px;
   }
   </style>
