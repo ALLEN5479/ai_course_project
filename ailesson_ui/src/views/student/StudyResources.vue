@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { computed, ref, onMounted, watch, nextTick } from 'vue'
 import { computed, ref, onMounted, watch, nextTick, onBeforeUnmount } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { Document, VideoCamera, Files, Monitor, ArrowLeft, ArrowRight } from '@element-plus/icons-vue'
 import axios from 'axios'
+
 
 const router = useRouter()
 const route = useRoute()
@@ -205,6 +207,7 @@ onBeforeUnmount(() => {
   reportRecord()
 })
 
+
 // 监听selectedResource变化，若为视频则绑定ratechange和seeked事件
 watch(selectedResource, async (newVal) => {
   await nextTick()
@@ -327,6 +330,7 @@ const userId = computed(() => route.query.user_id ? Number(route.query.user_id) 
           <el-col :span="collapsed ? 23 : 18">
             <el-card class="resource-viewer" @mouseenter="handleMouseEnter" @mouseleave="handleMouseLeave">
               <template v-if="selectedResource">
+
                 <template v-if="selectedResource.res_type === 'pdf'">
                   <iframe :src="selectedResource.resource_url" width="100%" height="600px" style="border:none;" />
                 </template>
@@ -361,6 +365,7 @@ const userId = computed(() => route.query.user_id ? Number(route.query.user_id) 
         </el-row>
       </el-main>
     </el-container>
+
   </div>
 </template>
 

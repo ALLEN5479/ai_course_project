@@ -232,7 +232,7 @@ const handleLogin = async () => {
           path: '/teacher/dashboard', 
           query: { 
             teacherId: loginForm.userNumber,
-            teacherName: loginForm.password,
+            teacherName: loginForm.password
           } 
         })
       } else {
