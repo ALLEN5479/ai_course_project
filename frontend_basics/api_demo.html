@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>前后端接口连接演示</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .code {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            margin: 10px 0;
+        }
+        .demo-form {
+            background-color: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .demo-form input, .demo-form button {
+            padding: 8px 12px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .demo-form button {
+            background-color: #2196f3;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .demo-form button:hover {
+            background-color: #1976d2;
+        }
+        .result {
+            background-color: #f1f8e9;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+            border-left: 4px solid #4caf50;
+        }
+        .error {
+            background-color: #ffebee;
+            border-left-color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <h1>前后端接口连接演示</h1>
+
+    <div class="section">
+        <h2>1. 接口概念解释</h2>
+        <p>接口就像是前后端之间的"桥梁"：</p>
+        <ul>
+            <li><strong>后端接口</strong>：提供数据和服务的"服务员"</li>
+            <li><strong>前端调用</strong>：向"服务员"点菜的"顾客"</li>
+            <li><strong>HTTP请求</strong>：顾客和服务员之间的"对话"</li>
+            <li><strong>JSON数据</strong>：传递信息的"菜单"</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>2. 后端接口示例（Java）</h2>
+        <div class="code">@RestController
+@CrossOrigin
+public class LoginController {
+    
+    @RequestMapping("/login")
+    public LoginEntity login(int user_id, String password){
+        // 1. 接收前端参数
+        // 2. 查询数据库
+        // 3. 返回结果
+        return loginMapper.login(user_id, password);
+    }
+}</div>
+        <p><strong>接口信息：</strong></p>
+        <ul>
+            <li>请求地址：<code>http://localhost:8080/login</code></li>
+            <li>请求方式：POST</li>
+            <li>请求参数：user_id, password</li>
+            <li>返回数据：用户信息（JSON格式）</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>3. 前端调用示例（JavaScript）</h2>
+        <div class="code">// 使用axios发送HTTP请求
+const response = await axios.post('http://localhost:8080/login', null, {
+    params: {
+        user_id: '12345',
+        password: '123456'
+    }
+});
+
+// 处理返回的数据
+const user = response.data;
+if (user && user.user_id) {
+    console.log('登录成功:', user.name);
+} else {
+    console.log('登录失败');
+}</div>
+    </div>
+
+    <div class="section">
+        <h2>4. 实际演示</h2>
+        <p>下面模拟一个登录过程（注意：这是模拟，实际需要后端服务器运行）</p>
+        
+        <div class="demo-form">
+            <h3>模拟登录</h3>
+            <input type="text" id="username" placeholder="用户名" value="12345">
+            <input type="password" id="password" placeholder="密码" value="123456">
+            <button onclick="simulateLogin()">登录</button>
+            <button onclick="simulateRegister()">注册</button>
+        </div>
+        
+        <div id="result" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="section">
+        <h2>5. 数据流程详解</h2>
+        <div class="code">步骤1: 用户输入信息
+    ↓
+步骤2: 前端发送HTTP请求
+    POST http://localhost:8080/login
+    params: {user_id: "12345", password: "123456"}
+    ↓
+步骤3: 后端接收并处理
+    - 验证用户名密码
+    - 查询数据库
+    - 返回用户信息
+    ↓
+步骤4: 前端接收响应
+    {user_id: "12345", name: "张三", type: 1}
+    ↓
+步骤5: 前端处理结果
+    - 登录成功：跳转到学生页面
+    - 登录失败：显示错误信息</div>
+    </div>
+
+    <div class="section">
+        <h2>6. 常见问题</h2>
+        <h3>Q: 为什么前端能访问后端？</h3>
+        <p>A: 通过HTTP协议，前端发送请求到后端的IP地址和端口（如localhost:8080）</p>
+        
+        <h3>Q: 数据是如何传递的？</h3>
+        <p>A: 通过JSON格式，前端发送参数，后端返回数据</p>
+        
+        <h3>Q: 什么是跨域问题？</h3>
+        <p>A: 浏览器安全策略，不同域名/端口间的请求需要后端配置@CrossOrigin</p>
+    </div>
+
+    <script>
+        // 模拟后端数据
+        const mockUsers = [
+            { user_id: "12345", name: "张三", type: 1, password: "123456" },
+            { user_id: "67890", name: "李老师", type: 2, password: "123456" }
+        ];
+
+        // 模拟登录
+        async function simulateLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<strong>正在登录...</strong>';
+            
+            // 模拟网络延迟
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // 模拟后端验证
+            const user = mockUsers.find(u => u.user_id === username && u.password === password);
+            
+            if (user) {
+                resultDiv.className = 'result';
+                resultDiv.innerHTML = `
+                    <strong>✅ 登录成功！</strong><br>
+                    用户信息：${JSON.stringify(user, null, 2)}<br>
+                    <br>
+                    <strong>下一步：</strong><br>
+                    ${user.type === 1 ? '跳转到学生页面' : '跳转到教师页面'}
+                `;
+            } else {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = '<strong>❌ 登录失败</strong><br>用户名或密码错误';
+            }
+        }
+
+        // 模拟注册
+        async function simulateRegister() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<strong>正在注册...</strong>';
+            
+            // 模拟网络延迟
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // 模拟后端注册逻辑
+            const existingUser = mockUsers.find(u => u.user_id === username);
+            
+            if (existingUser) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = '<strong>❌ 注册失败</strong><br>用户已存在';
+            } else {
+                resultDiv.className = 'result';
+                resultDiv.innerHTML = `
+                    <strong>✅ 注册成功！</strong><br>
+                    新用户：${username}<br>
+                    <br>
+                    <strong>下一步：</strong><br>
+                    可以尝试登录了
+                `;
+            }
+        }
+
+        // 页面加载时显示说明
+        window.onload = function() {
+            console.log('页面加载完成，可以开始演示前后端接口连接');
+        };
+    </script>
+</body>
+</html> 
