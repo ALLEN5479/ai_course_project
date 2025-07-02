@@ -169,12 +169,13 @@ const router = createRouter({
       name: 'StudentAbility',
       component: () => import('@/views/student/ability/index.vue')
     },
-    {
-      path: '/quiz',
+    {path: '/quiz',
       name: 'quiz',
       component: QuizVew,
-    },
-  ],
+    }
+  ]
+
+
 })
 
 export default router

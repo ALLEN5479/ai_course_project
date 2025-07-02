@@ -103,6 +103,7 @@ import { useRouter, useRoute } from 'vue-router'
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import { Reading, DataAnalysis, Edit, Document } from '@element-plus/icons-vue'
+import AiChatModal from '../teacher/AiChatModal.vue'
 
 const router = useRouter()
 const route = useRoute()
