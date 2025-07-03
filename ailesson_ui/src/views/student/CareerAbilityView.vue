@@ -42,10 +42,10 @@
       </div>
 
       <!-- AI报告 -->
-      <div class="ai-report-section" v-if="abilityData.aiReport">
+      <div class="ai-report-section" v-if="abilityData.ai_report">
         <h3>AI能力报告</h3>
         <el-card>
-          <div style="white-space: pre-line;">{{ abilityData.aiReport }}</div>
+          <div style="white-space: pre-line;">{{ abilityData.ai_report }}</div>
         </el-card>
       </div>
 
@@ -57,30 +57,30 @@
             <el-card class="ability-card">
               <div class="ability-header">
                 <h4>课程能力</h4>
-                <span class="score">{{ abilityData.courseScore }}</span>
+                <span class="score">{{ abilityData.course_score }}</span>
               </div>
-              <el-progress :percentage="abilityData.courseScore || 0" :color="getScoreColor(abilityData.courseScore)" />
-              <p class="description">{{ getAbilityDescription('course', abilityData.courseScore) }}</p>
+              <el-progress :percentage="abilityData.course_score || 0" :color="getScoreColor(abilityData.course_score)" />
+              <p class="description">{{ getAbilityDescription('course', abilityData.course_score) }}</p>
             </el-card>
           </el-col>
           <el-col :span="8">
             <el-card class="ability-card">
               <div class="ability-header">
                 <h4>实践能力</h4>
-                <span class="score">{{ abilityData.practiceScore }}</span>
+                <span class="score">{{ abilityData.practice_score }}</span>
               </div>
-              <el-progress :percentage="abilityData.practiceScore" :color="getScoreColor(abilityData.practiceScore)" />
-              <p class="description">{{ getAbilityDescription('practice', abilityData.practiceScore) }}</p>
+              <el-progress :percentage="abilityData.practice_score" :color="getScoreColor(abilityData.practice_score)" />
+              <p class="description">{{ getAbilityDescription('practice', abilityData.practice_score) }}</p>
             </el-card>
           </el-col>
           <el-col :span="8">
             <el-card class="ability-card">
               <div class="ability-header">
                 <h4>综合素养</h4>
-                <span class="score">{{ abilityData.qualityScore }}</span>
+                <span class="score">{{ abilityData.quality_score }}</span>
               </div>
-              <el-progress :percentage="abilityData.qualityScore" :color="getScoreColor(abilityData.qualityScore)" />
-              <p class="description">{{ getAbilityDescription('quality', abilityData.qualityScore) }}</p>
+              <el-progress :percentage="abilityData.quality_score" :color="getScoreColor(abilityData.quality_score)" />
+              <p class="description">{{ getAbilityDescription('quality', abilityData.quality_score) }}</p>
             </el-card>
           </el-col>
         </el-row>
@@ -89,30 +89,30 @@
             <el-card class="ability-card">
               <div class="ability-header">
                 <h4>创新能力</h4>
-                <span class="score">{{ abilityData.innovationScore }}</span>
+                <span class="score">{{ abilityData.innovation_score }}</span>
               </div>
-              <el-progress :percentage="abilityData.innovationScore" :color="getScoreColor(abilityData.innovationScore)" />
-              <p class="description">{{ getAbilityDescription('innovation', abilityData.innovationScore) }}</p>
+              <el-progress :percentage="abilityData.innovation_score" :color="getScoreColor(abilityData.innovation_score)" />
+              <p class="description">{{ getAbilityDescription('innovation', abilityData.innovation_score) }}</p>
             </el-card>
           </el-col>
           <el-col :span="8">
             <el-card class="ability-card">
               <div class="ability-header">
                 <h4>团队协作</h4>
-                <span class="score">{{ abilityData.teamworkScore }}</span>
+                <span class="score">{{ abilityData.teamwork_score }}</span>
               </div>
-              <el-progress :percentage="abilityData.teamworkScore" :color="getScoreColor(abilityData.teamworkScore)" />
-              <p class="description">{{ getAbilityDescription('teamwork', abilityData.teamworkScore) }}</p>
+              <el-progress :percentage="abilityData.teamwork_score" :color="getScoreColor(abilityData.teamwork_score)" />
+              <p class="description">{{ getAbilityDescription('teamwork', abilityData.teamwork_score) }}</p>
             </el-card>
           </el-col>
           <el-col :span="8">
             <el-card class="ability-card">
               <div class="ability-header">
                 <h4>沟通表达</h4>
-                <span class="score">{{ abilityData.communicationScore }}</span>
+                <span class="score">{{ abilityData.communication_score }}</span>
               </div>
-              <el-progress :percentage="abilityData.communicationScore" :color="getScoreColor(abilityData.communicationScore)" />
-              <p class="description">{{ getAbilityDescription('communication', abilityData.communicationScore) }}</p>
+              <el-progress :percentage="abilityData.communication_score" :color="getScoreColor(abilityData.communication_score)" />
+              <p class="description">{{ getAbilityDescription('communication', abilityData.communication_score) }}</p>
             </el-card>
           </el-col>
         </el-row>
@@ -124,7 +124,7 @@
           <el-col :span="12">
             <el-card class="total-card">
               <div class="total-content">
-                <div class="total-number">{{ abilityData.totalScore }}</div>
+                <div class="total-number">{{ abilityData.total_score }}</div>
                 <div class="total-label">能力总分</div>
               </div>
             </el-card>
@@ -149,6 +149,7 @@ import { ElMessage } from 'element-plus'
 import { Refresh } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
 import { getStudentCareerAbility } from '../../api/careerAbilityApi'
+import { useRoute } from 'vue-router'
 
 // 响应式数据
 const radarChartRef = ref()
@@ -163,45 +164,47 @@ const studentInfo = ref({
 
 // 能力数据
 const abilityData = ref({
-  courseScore: 0,
-  practiceScore: 0,
-  qualityScore: 0,
-  innovationScore: 0,
-  teamworkScore: 0,
-  communicationScore: 0,
-  totalScore: 0,
+  course_score: 0,
+  practice_score: 0,
+  quality_score: 0,
+  innovation_score: 0,
+  teamwork_score: 0,
+  communication_score: 0,
+  total_score: 0,
   rank: 0,
-  aiReport: ''
+  ai_report: ''
 })
 
 // 方法
 const loadAbilityData = async () => {
   console.log('loadAbilityData 被调用')
   const userId = localStorage.getItem('user_id') || ''
+  console.log('userId:', userId)
   if (!userId) {
     ElMessage.error('未获取到用户ID，请重新登录')
     return
   }
   try {
+    console.log('请求URL:', '/api/career/ability/student/' + userId)
     const response = await getStudentCareerAbility(userId)
-    console.log('接口原始响应:', response)
-    if (response && response.code === 200 && response.data) {
-      const data = response.data
+    console.log('接口响应:', response)
+    if (response && response.data && response.data.code === 200 && response.data.data) {
+      const data = response.data.data
       studentInfo.value = {
         name: data.name,
-        studentId: data.studentId,
-        className: data.className
+        studentId: data.student_id,
+        className: data.class_name
       }
       abilityData.value = {
-        courseScore: data.courseScore,
-        practiceScore: data.practiceScore,
-        qualityScore: data.qualityScore,
-        innovationScore: data.innovationScore,
-        teamworkScore: data.teamworkScore,
-        communicationScore: data.communicationScore,
-        totalScore: data.totalScore,
+        course_score: data.course_score,
+        practice_score: data.practice_score,
+        quality_score: data.quality_score,
+        innovation_score: data.innovation_score,
+        teamwork_score: data.teamwork_score,
+        communication_score: data.communication_score,
+        total_score: data.total_score,
         rank: data.rank,
-        aiReport: data.aiReport
+        ai_report: data.ai_report
       }
       await nextTick()
       initRadarChart()
@@ -250,12 +253,12 @@ const initRadarChart = () => {
       type: 'radar',
       data: [{
         value: [
-          abilityData.value.courseScore,
-          abilityData.value.practiceScore,
-          abilityData.value.qualityScore,
-          abilityData.value.innovationScore,
-          abilityData.value.teamworkScore,
-          abilityData.value.communicationScore
+          abilityData.value.course_score,
+          abilityData.value.practice_score,
+          abilityData.value.quality_score,
+          abilityData.value.innovation_score,
+          abilityData.value.teamwork_score,
+          abilityData.value.communication_score
         ],
         name: '当前能力',
         areaStyle: { color: 'rgba(64,158,255,0.4)' }

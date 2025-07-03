@@ -10,4 +10,5 @@ public interface CareerAbilityService {
     Map<String, Object> getCareerAbilityList(int page, int size);
     AjaxResult importFromExcel(MultipartFile file);
     CareerAbilityData getStudentCareerAbility(String studentId);
+    int deleteCareerAbility(String studentId);
 }

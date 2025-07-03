@@ -11,15 +11,16 @@ import org.springframework.stereotype.Service;
 public class AiReportServiceImpl implements AiReportService {
     
     @Override
-    public AiResult getAiReport(String prompt) {
+    public AiResult getAiReport(String prompt, String userId) {
         try {
-            String apiUrl = "http://localhost/v1/chat-messages";
+            String apiUrl = "http://localhost/v1";
             String apiKey = "app-U4I9n3gdpnt9cXg5jB93v1Vw";
 
             OkHttpClient client = new OkHttpClient();
             String jsonBody = "{"
                 + "\"query\": \"" + prompt.replace("\"", "\\\"") + "\","
-                + "\"response_mode\": \"blocking\""
+                + "\"response_mode\": \"blocking\","
+                + "\"user\": \"" + userId + "\""
                 + "}";
 
             RequestBody body = RequestBody.create(
@@ -50,4 +51,6 @@ public class AiReportServiceImpl implements AiReportService {
             return result;
         }
     }
+
+
 }

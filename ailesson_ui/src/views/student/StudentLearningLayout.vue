@@ -53,7 +53,7 @@ const activeMenu = ref('courseDetail')
 // 获取参数
 const route = useRoute()
 const courseId = route.query.courseId
-const userId = route.query.user_id
+const userId = localStorage.getItem('user_id') || ''
 const courseName = route.query.courseName as string || '课程名称'
 const teacherName = route.query.teacherName as string || '教师姓名'
 

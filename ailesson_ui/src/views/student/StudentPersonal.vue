@@ -69,19 +69,13 @@ import { ElMessage } from 'element-plus'
 const router = useRouter()
 const route = useRoute() // 获取当前路由信息
 
-// 存储从路由中获取的参数
-const routeParams = ref({
-  user_id: route.query.user_id || '',
-  name: route.query.name || ''
-})
-
-// 学生信息（使用路由参数）
-const studentName = ref(route.query.name || '学生')
-const studentId = ref(route.query.user_id || '未获取学号')
+// 学生信息（使用 localStorage）
+const studentName = ref(localStorage.getItem('student_name') || '学生')
+const studentId = ref(localStorage.getItem('user_id') || '未获取学号')
 
 const form = ref({
-  user_id: '',
-  name: '',
+  user_id: localStorage.getItem('user_id') || '',
+  name: localStorage.getItem('student_name') || '',
   gender: '',
   grade: '',
   class_name: '',
@@ -92,33 +86,16 @@ const form = ref({
 // 返回主页时保留参数
 const goBack = () => {
   router.push({
-    path: '/student/dashboard',
-    query: {
-      ...routeParams.value // 保留当前所有参数
-    }
+    path: '/student/dashboard'
   })
 }
 
 // 监听路由参数变化
 onMounted(async () => {
-  // 确保参数更新
-  routeParams.value = {
-    user_id: route.query.user_id || '',
-    name: route.query.name || ''
-  }
-
-  // 更新学生信息
-  studentName.value = route.query.name || '学生'
-  studentId.value = route.query.user_id || '未获取学号'
-
-  form.value.user_id = route.query.user_id as string
-  form.value.name = route.query.name as string
   // 获取扩展信息
   const res = await getStudentInfo(form.value.user_id)
   if (res.data) {
     Object.assign(form.value, res.data)
-    // 保证 name 字段不被覆盖
-    form.value.name = route.query.name as string
   }
 })
 

@@ -16,7 +16,7 @@
         <el-col :span="6">
           <el-card class="stat-card">
             <div class="stat-content">
-              <div class="stat-number">{{ stats.totalStudents }}</div>
+              <div class="stat-number">{{ stats.total_students }}</div>
               <div class="stat-label">总学生数</div>
             </div>
           </el-card>
@@ -24,7 +24,7 @@
         <el-col :span="6">
           <el-card class="stat-card">
             <div class="stat-content">
-              <div class="stat-number">{{ stats.analyzedStudents }}</div>
+              <div class="stat-number">{{ stats.analyzed_students }}</div>
               <div class="stat-label">已分析学生</div>
             </div>
           </el-card>
@@ -32,7 +32,7 @@
         <el-col :span="6">
           <el-card class="stat-card">
             <div class="stat-content">
-              <div class="stat-number">{{ stats.reportCount }}</div>
+              <div class="stat-number">{{ stats.report_count }}</div>
               <div class="stat-label">AI报告数</div>
             </div>
           </el-card>
@@ -40,7 +40,7 @@
         <el-col :span="6">
           <el-card class="stat-card">
             <div class="stat-content">
-              <div class="stat-number">{{ stats.avgScore }}</div>
+              <div class="stat-number">{{ stats.avg_score }}</div>
               <div class="stat-label">平均能力分</div>
             </div>
           </el-card>
@@ -64,33 +64,34 @@
         </div>
 
         <el-table :data="filteredStudents" style="width: 100%" v-loading="loading">
-          <el-table-column prop="studentId" label="学号" width="120" />
+          <el-table-column prop="student_id" label="学号" width="120" />
           <el-table-column prop="name" label="姓名" width="120" />
-          <el-table-column prop="className" label="班级" width="120" />
-          <el-table-column prop="courseScore" label="课程能力" width="100">
+          <el-table-column prop="class_name" label="班级" width="120" />
+          <el-table-column prop="course_score" label="课程能力" width="100">
             <template #default="scope">
-              <el-progress :percentage="scope.row.courseScore" :color="getScoreColor(scope.row.courseScore)" />
+              <el-progress :percentage="scope.row.course_score" :color="getScoreColor(scope.row.course_score)" />
             </template>
           </el-table-column>
-          <el-table-column prop="practiceScore" label="实践能力" width="100">
+          <el-table-column prop="practice_score" label="实践能力" width="100">
             <template #default="scope">
-              <el-progress :percentage="scope.row.practiceScore" :color="getScoreColor(scope.row.practiceScore)" />
+              <el-progress :percentage="scope.row.practice_score" :color="getScoreColor(scope.row.practice_score)" />
             </template>
           </el-table-column>
-          <el-table-column prop="qualityScore" label="综合素养" width="100">
+          <el-table-column prop="quality_score" label="综合素养" width="100">
             <template #default="scope">
-              <el-progress :percentage="scope.row.qualityScore" :color="getScoreColor(scope.row.qualityScore)" />
+              <el-progress :percentage="scope.row.quality_score" :color="getScoreColor(scope.row.quality_score)" />
             </template>
           </el-table-column>
-          <el-table-column prop="totalScore" label="总分" width="80">
+          <el-table-column prop="total_score" label="总分" width="80">
             <template #default="scope">
-              <span class="total-score">{{ scope.row.totalScore }}</span>
+              <span class="total-score">{{ scope.row.total_score }}</span>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="200">
+          <el-table-column label="操作" width="260">
             <template #default="scope">
               <el-button size="small" @click="viewAbilityMap(scope.row)">查看图谱</el-button>
               <el-button size="small" type="primary" @click="generateReport(scope.row)">生成报告</el-button>
+              <el-button size="small" type="danger" @click="deleteAbility(scope.row)">删除</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -126,7 +127,7 @@ import { ElMessage } from 'element-plus'
 import { Upload, Search } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
 import CareerAbilityUpload from './CareerAbilityUpload.vue'
-import { getCareerAbilityList, generateAiReport } from '../../api/careerAbilityApi'
+import { getCareerAbilityList, generateAiReport, deleteCareerAbility } from '../../api/careerAbilityApi'
 
 // 响应式数据
 const loading = ref(false)
@@ -140,10 +141,10 @@ const radarChartRef = ref()
 
 // 统计数据
 const stats = ref({
-  totalStudents: 0,
-  analyzedStudents: 0,
-  reportCount: 0,
-  avgScore: 0
+  total_students: 0,
+  analyzed_students: 0,
+  report_count: 0,
+  avg_score: 0
 })
 
 // 学生列表数据
@@ -154,7 +155,7 @@ const filteredStudents = computed(() => {
   if (!searchKeyword.value) return students.value
   return students.value.filter(student => 
     student.name.includes(searchKeyword.value) || 
-    student.studentId.includes(searchKeyword.value)
+    student.student_id.includes(searchKeyword.value)
   )
 })
 
@@ -166,9 +167,16 @@ const loadStudents = async () => {
       page: currentPage.value,
       size: pageSize.value
     })
-    students.value = response.data.list
-    total.value = response.data.total
-    stats.value = response.data.stats
+    // 关键：多解一层 data
+    const data = response.data?.data || {}
+    students.value = data.list || []
+    total.value = data.total || 0
+    stats.value = data.stats || {
+      total_students: 0,
+      analyzed_students: 0,
+      report_count: 0,
+      avg_score: 0
+    }
   } catch (error) {
     ElMessage.error('加载学生数据失败')
   } finally {
@@ -215,12 +223,12 @@ const initRadarChart = (student: any) => {
       type: 'radar',
       data: [{
         value: [
-          student.courseScore,
-          student.practiceScore,
-          student.qualityScore,
-          student.innovationScore || 70,
-          student.teamworkScore || 75,
-          student.communicationScore || 80
+          student.course_score,
+          student.practice_score,
+          student.quality_score,
+          student.innovation_score || 70,
+          student.teamwork_score || 75,
+          student.communication_score || 80
         ],
         name: '当前能力',
         areaStyle: { color: 'rgba(64,158,255,0.4)' }
@@ -233,11 +241,21 @@ const initRadarChart = (student: any) => {
 
 const generateReport = async (student: any) => {
   try {
-    const response = await generateAiReport(student.studentId)
+    const response = await generateAiReport(student.student_id)
     ElMessage.success('AI能力报告生成成功')
     // 可选：弹窗展示报告内容
   } catch (error) {
     ElMessage.error('生成AI报告失败')
+  }
+}
+
+const deleteAbility = async (row: any) => {
+  try {
+    await deleteCareerAbility(row.student_id)
+    ElMessage.success('删除成功')
+    loadStudents()
+  } catch (e) {
+    ElMessage.error('删除失败')
   }
 }
 

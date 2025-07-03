@@ -38,11 +38,32 @@ public class CareerAbilityServiceImpl implements CareerAbilityService {
 
     @Override
     public Map<String, Object> getCareerAbilityList(int page, int size) {
-        // 实现分页查询逻辑，返回数据
         Map<String, Object> result = new HashMap<>();
-        // result.put("list", ...);
-        // result.put("total", ...);
-        // result.put("stats", ...);
+
+        // 1. 分页查询
+        int offset = (page - 1) * size;
+        List<CareerAbilityData> list = careerAbilityMapper.select_page(offset, size);
+
+        // 2. 总数统计
+        int total = careerAbilityMapper.count_all();
+
+        // 3. 其它统计
+        int analyzed_students = total; // 你可以根据实际业务调整
+        int report_count = careerAbilityMapper.count_ai_report_not_null();
+        Double avg_score = careerAbilityMapper.avg_total_score();
+        if (avg_score == null) avg_score = 0.0;
+
+        // 4. 封装统计信息
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("total_students", total);
+        stats.put("analyzed_students", analyzed_students);
+        stats.put("report_count", report_count);
+        stats.put("avg_score", avg_score);
+
+        // 5. 封装返回
+        result.put("list", list);
+        result.put("total", total);
+        result.put("stats", stats);
         return result;
     }
 
@@ -65,20 +86,20 @@ public class CareerAbilityServiceImpl implements CareerAbilityService {
 
                 // 调用大模型API
                 String prompt = allExperience;
-                AiResult aiResult = aiReportService.getAiReport(prompt);
+                AiResult aiResult = aiReportService.getAiReport(prompt, student.getStudentId());
 
                 // 封装能力数据
                 CareerAbilityData data = new CareerAbilityData();
-                data.setStudentId(student.getStudentId());
+                data.setStudent_id(student.getStudentId());
                 data.setName(student.getName());
-                data.setClassName(student.getClassName());
-                data.setCourseScore(aiResult.getCourseScore());
-                data.setPracticeScore(aiResult.getPracticeScore());
-                data.setInnovationScore(aiResult.getInnovationScore());
-                data.setTeamworkScore(aiResult.getTeamworkScore());
-                data.setCommunicationScore(aiResult.getCommunicationScore());
-                data.setQualityScore(aiResult.getQualityScore());
-                data.setAiReport(aiResult.getReport());
+                data.setClass_name(student.getClassName());
+                data.setCourse_score(aiResult.getCourseScore());
+                data.setPractice_score(aiResult.getPracticeScore());
+                data.setInnovation_score(aiResult.getInnovationScore());
+                data.setTeamwork_score(aiResult.getTeamworkScore());
+                data.setCommunication_score(aiResult.getCommunicationScore());
+                data.setQuality_score(aiResult.getQualityScore());
+                data.setAi_report(aiResult.getReport());
                 saveList.add(data);
             }
             // 批量入库
@@ -95,5 +116,10 @@ public class CareerAbilityServiceImpl implements CareerAbilityService {
     @Override
     public CareerAbilityData getStudentCareerAbility(String studentId) {
         return careerAbilityMapper.selectByStudentId(studentId);
+    }
+
+    @Override
+    public int deleteCareerAbility(String studentId) {
+        return careerAbilityMapper.deleteByStudentId(studentId);
     }
 }

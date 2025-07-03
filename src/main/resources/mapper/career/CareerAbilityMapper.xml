@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.ai_lesson.career.mapper.CareerAbilityMapper">
+
+    <insert id="insertOrUpdate" parameterType="com.example.ai_lesson.career.entity.CareerAbilityData">
+        INSERT INTO career_ability_data
+        (student_id, name, class_name, course_score, practice_score, innovation_score, teamwork_score, communication_score, quality_score, ai_report)
+        VALUES
+        (#{student_id}, #{name}, #{class_name}, #{course_score}, #{practice_score}, #{innovation_score}, #{teamwork_score}, #{communication_score}, #{quality_score}, #{ai_report})
+        ON DUPLICATE KEY UPDATE
+            name=VALUES(name),
+            class_name=VALUES(class_name),
+            course_score=VALUES(course_score),
+            practice_score=VALUES(practice_score),
+            innovation_score=VALUES(innovation_score),
+            teamwork_score=VALUES(teamwork_score),
+            communication_score=VALUES(communication_score),
+            quality_score=VALUES(quality_score),
+            ai_report=VALUES(ai_report)
+    </insert>
+
+    <select id="selectByStudentId" resultType="com.example.ai_lesson.career.entity.CareerAbilityData">
+        SELECT * FROM career_ability_data WHERE student_id = #{student_id}
+    </select>
+
+    <!-- 分页查询 -->
+    <select id="select_page" resultType="com.example.ai_lesson.career.entity.CareerAbilityData">
+        SELECT * FROM career_ability_data
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <!-- 总数统计 -->
+    <select id="count_all" resultType="int">
+        SELECT COUNT(*) FROM career_ability_data
+    </select>
+
+    <!-- AI报告不为空的数量 -->
+    <select id="count_ai_report_not_null" resultType="int">
+        SELECT COUNT(*) FROM career_ability_data WHERE ai_report IS NOT NULL AND ai_report != ''
+    </select>
+
+    <!-- 平均总分（以六项能力分数平均） -->
+    <select id="avg_total_score" resultType="double">
+        SELECT AVG((IFNULL(course_score,0) + IFNULL(practice_score,0) + IFNULL(quality_score,0) + IFNULL(innovation_score,0) + IFNULL(teamwork_score,0) + IFNULL(communication_score,0))/6) FROM career_ability_data
+    </select>
+
+    <delete id="deleteByStudentId" parameterType="string">
+        DELETE FROM career_ability_data WHERE student_id = #{studentId}
+    </delete>
+
+    <!-- 你可以继续添加 select、update、delete 等SQL -->
+</mapper>

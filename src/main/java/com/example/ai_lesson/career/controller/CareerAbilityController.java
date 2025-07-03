@@ -36,4 +36,10 @@ public class CareerAbilityController {
         // 调用AI服务生成报告
         return careerAbilityService.generateAiReport(studentId);
     }
+
+    @DeleteMapping("/delete/{studentId}")
+    public AjaxResult deleteCareerAbility(@PathVariable String studentId) {
+        int rows = careerAbilityService.deleteCareerAbility(studentId);
+        return rows > 0 ? AjaxResult.success("删除成功") : AjaxResult.error("删除失败");
+    }
 }

@@ -13,7 +13,18 @@ public class AiReportController {
     private AiReportService aiReportService;
 
     @PostMapping
-    public AiResult getAiReport(@RequestBody String prompt) {
-        return aiReportService.getAiReport(prompt);
+    public AiResult getAiReport(@RequestBody AiReportRequest req) {
+        return aiReportService.getAiReport(req.getPrompt(), req.getUserId());
     }
+
+   
+}
+
+class AiReportRequest {
+    private String prompt;
+    private String userId;
+    public String getPrompt() { return prompt; }
+    public void setPrompt(String prompt) { this.prompt = prompt; }
+    public String getUserId() { return userId; }
+    public void setUserId(String userId) { this.userId = userId; }
 } 
