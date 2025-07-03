@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS基础学习</title>
+    <style>
+        /* 1. 基本选择器 */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        
+        /* 2. 类选择器 */
+        .title {
+            color: #333;
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        
+        /* 3. ID选择器 */
+        #main-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        /* 4. 元素选择器 */
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        
+        /* 5. 伪类选择器 */
+        a:hover {
+            color: #e74c3c;
+            text-decoration: none;
+        }
+        
+        /* 6. 盒模型 */
+        .box {
+            width: 200px;
+            height: 100px;
+            padding: 20px;
+            margin: 10px;
+            border: 2px solid #3498db;
+            background-color: #ecf0f1;
+        }
+        
+        /* 7. Flexbox布局 */
+        .flex-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #34495e;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .flex-item {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+        }
+        
+        /* 8. 响应式设计 */
+        @media (max-width: 768px) {
+            .flex-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .box {
+                width: 100%;
+            }
+        }
+        
+        /* 9. 动画效果 */
+        .animated-box {
+            width: 100px;
+            height: 100px;
+            background-color: #e74c3c;
+            transition: all 0.3s ease;
+            margin: 20px;
+        }
+        
+        .animated-box:hover {
+            transform: scale(1.1);
+            background-color: #f39c12;
+        }
+        
+        /* 10. 表单样式 */
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+        .btn {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .btn:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="title">CSS基础学习</h1>
+    
+    <div id="main-content">
+        <h2>1. 盒模型示例</h2>
+        <div class="box">
+            这是一个盒子，展示了padding、margin、border的效果
+        </div>
+        
+        <h2>2. Flexbox布局</h2>
+        <div class="flex-container">
+            <div class="flex-item">项目1</div>
+            <div class="flex-item">项目2</div>
+            <div class="flex-item">项目3</div>
+        </div>
+        
+        <h2>3. 动画效果</h2>
+        <div class="animated-box"></div>
+        <p>鼠标悬停在红色方块上查看动画效果</p>
+        
+        <h2>4. 表单样式</h2>
+        <form>
+            <div class="form-group">
+                <label for="name">姓名：</label>
+                <input type="text" id="name" name="name" placeholder="请输入姓名">
+            </div>
+            
+            <div class="form-group">
+                <label for="email">邮箱：</label>
+                <input type="email" id="email" name="email" placeholder="请输入邮箱">
+            </div>
+            
+            <button type="submit" class="btn">提交</button>
+        </form>
+        
+        <h2>5. 链接样式</h2>
+        <a href="#">这是一个链接，鼠标悬停查看效果</a>
+    </div>
+</body>
+</html> 

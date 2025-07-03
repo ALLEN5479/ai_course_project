@@ -133,6 +133,16 @@
               </el-card>
             </el-col>
           </el-row>
+
+          <el-col :span="6">
+            <el-card class="quick-action-card" @click="$router.push('/teacher/career-ability')" style="cursor:pointer;">
+              <div>
+                <i class="el-icon-pie-chart" style="font-size: 32px; color: #409EFF;"></i>
+                <div style="margin-top: 10px; font-weight: bold;">生涯能力管理</div>
+                <div style="font-size: 12px; color: #888;">查看/管理学生能力图谱</div>
+              </div>
+            </el-card>
+          </el-col>
         </div>
 
         <!-- 待完成工作 -->
@@ -167,6 +177,14 @@ import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import axios from 'axios'
 
+// 定义课程接口类型
+interface Course {
+  course_id: string
+  course_name: string
+  description?: string
+  teacher_id: string
+}
+
 const router = useRouter()
 const route = useRoute()
 
@@ -198,8 +216,8 @@ const stats = ref({
   pendingTasks: 8
 })
 
-// 我的课程
-const myCourses = ref([])
+// 我的课程 - 添加类型声明
+const myCourses = ref<Course[]>([])
 
 // 获取教师课程数据
 const fetchTeacherCourses = async () => {
@@ -308,7 +326,7 @@ const goToCourses = () => {
   })
 }
 
-const manageCourse = (course: any) => {
+const manageCourse = (course: Course) => {
   router.push({
     path: `/teacher/courses/${course.course_id}`,
     query: {
@@ -603,5 +621,18 @@ onMounted(() => {
 .action-desc {
   font-size: 12px;
   color: #666;
+}
+
+.quick-action-card {
+  text-align: center;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.quick-action-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
 </style>

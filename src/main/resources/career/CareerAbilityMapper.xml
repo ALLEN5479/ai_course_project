@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.ai_lesson.career.mapper.CareerAbilityMapper">
+
+    <insert id="insertOrUpdate" parameterType="com.example.ai_lesson.career.entity.CareerAbilityData">
+        INSERT INTO career_ability_data
+        (student_id, name, class_name, course_score, practice_score, innovation_score, teamwork_score, communication_score, quality_score, ai_report)
+        VALUES
+        (#{studentId}, #{name}, #{className}, #{courseScore}, #{practiceScore}, #{innovationScore}, #{teamworkScore}, #{communicationScore}, #{qualityScore}, #{aiReport})
+        ON DUPLICATE KEY UPDATE
+            name=VALUES(name),
+            class_name=VALUES(class_name),
+            course_score=VALUES(course_score),
+            practice_score=VALUES(practiceScore),
+            innovation_score=VALUES(innovationScore),
+            teamwork_score=VALUES(teamworkScore),
+            communication_score=VALUES(communicationScore),
+            quality_score=VALUES(qualityScore),
+            ai_report=VALUES(aiReport)
+    </insert>
+
+    <select id="selectByStudentId" resultType="com.example.ai_lesson.career.entity.CareerAbilityData">
+        SELECT * FROM career_ability_data WHERE student_id = #{studentId}
+    </select>
+
+    <!-- 你可以继续添加 select、update、delete 等SQL -->
+</mapper>

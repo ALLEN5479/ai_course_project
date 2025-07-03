@@ -46,7 +46,7 @@ const chartOptions = {
     name: '能力评分',
     type: 'radar',
     data: [
-      { value: [1500, 1500, 1500, 1500, 1500], name: '当前能力' }
+      { value: [1500, 1500, 1500, 1500, 1500], name: '当前能力', areaStyle: { color: 'rgba(24, 144, 255, 0.8)' } }
     ]
   }]
 }
@@ -89,7 +89,8 @@ const updateRadarChart = (values: number[]) => {
       data: [
         {
           value: values,
-          name: '当前能力'
+          name: '当前能力',
+          areaStyle: { color: 'rgba(24, 144, 255, 0.8)' }
         }
       ]
     }]

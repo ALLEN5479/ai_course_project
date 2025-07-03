@@ -11,7 +11,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
     "com.example.ai_lesson.mission.Mapper",
     "com.example.ai_lesson.student_courses.mapper",
     "com.example.ai_lesson.aiquestion.mapper",
-    "com.example.ai_lesson.study_resources.mapper"
+    "com.example.ai_lesson.study_resources.mapper",
+    "com.example.ai_lesson.career.mapper"
 })
 @SpringBootApplication
 public class AiLessonApplication {

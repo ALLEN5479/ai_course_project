@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript基础学习</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .section { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; }
+        .output { background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; margin: 10px 0; }
+        button { background-color: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>JavaScript基础学习</h1>
+
+    <!-- 1. 变量和数据类型 -->
+    <div class="section">
+        <h2>1. 变量和数据类型</h2>
+        <button onclick="showVariables()">查看变量示例</button>
+        <div id="variables-output" class="output"></div>
+    </div>
+
+    <!-- 2. 函数 -->
+    <div class="section">
+        <h2>2. 函数</h2>
+        <input type="number" id="num1" placeholder="数字1">
+        <input type="number" id="num2" placeholder="数字2">
+        <button onclick="calculate()">计算</button>
+        <div id="function-output" class="output"></div>
+    </div>
+
+    <!-- 3. DOM操作 -->
+    <div class="section">
+        <h2>3. DOM操作</h2>
+        <button onclick="changeText()">改变文本</button>
+        <button onclick="addElement()">添加元素</button>
+        <div id="dom-demo">
+            <p>这是原始文本</p>
+        </div>
+    </div>
+
+    <script>
+        // 1. 变量和数据类型
+        function showVariables() {
+            let name = "张三";           // 字符串
+            let age = 25;               // 数字
+            let isStudent = true;       // 布尔值
+            let hobbies = ["读书", "游泳", "编程"];  // 数组
+            let person = {              // 对象
+                name: "李四",
+                age: 30,
+                city: "北京"
+            };
+            
+            let output = `
+                <p>字符串: ${name}</p>
+                <p>数字: ${age}</p>
+                <p>布尔值: ${isStudent}</p>
+                <p>数组: ${hobbies}</p>
+                <p>对象: ${JSON.stringify(person)}</p>
+            `;
+            
+            document.getElementById('variables-output').innerHTML = output;
+        }
+
+        // 2. 函数
+        function calculate() {
+            let num1 = parseFloat(document.getElementById('num1').value);
+            let num2 = parseFloat(document.getElementById('num2').value);
+            
+            if (isNaN(num1) || isNaN(num2)) {
+                document.getElementById('function-output').innerHTML = "请输入有效的数字";
+                return;
+            }
+            
+            // 函数声明
+            function add(a, b) {
+                return a + b;
+            }
+            
+            // 箭头函数
+            let multiply = (a, b) => a * b;
+            
+            let result = `
+                <p>加法: ${num1} + ${num2} = ${add(num1, num2)}</p>
+                <p>乘法: ${num1} × ${num2} = ${multiply(num1, num2)}</p>
+            `;
+            
+            document.getElementById('function-output').innerHTML = result;
+        }
+
+        // 3. DOM操作
+        function changeText() {
+            let demo = document.getElementById('dom-demo');
+            let p = demo.querySelector('p');
+            p.textContent = "文本已被JavaScript改变！";
+            p.style.color = "red";
+        }
+
+        function addElement() {
+            let demo = document.getElementById('dom-demo');
+            let newElement = document.createElement('div');
+            newElement.textContent = "这是新添加的元素";
+            newElement.style.backgroundColor = "lightblue";
+            newElement.style.padding = "10px";
+            demo.appendChild(newElement);
+        }
+    </script>
+</body>
+</html> 
