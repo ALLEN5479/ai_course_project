@@ -40,11 +40,11 @@ const router = createRouter({
           name: 'student-knowledge-graph',
           component: () => import('../views/student/KnowledgeGraph.vue'),
         },
-       // {
-        //  path: 'learning',
-        // name: 'student-learning',
-        // component: () => import('../views/student/StudentLearningLayout.vue'),
-       // },
+        {
+          path: 'learning',
+          name: 'student-learning',
+          component: () => import('../views/student/StudentLearningLayout.vue'),
+        },
         //旧版的课程总览页面 {
         //   path: 'learning/:courseId',
         //   name: 'student-learning-with-course',
@@ -76,9 +76,25 @@ const router = createRouter({
           component: () => import('../views/student/StudyResources.vue'),
         },
         {
-          path: 'career-ability',
-          name: 'student-career-ability',
-          component: () => import('../views/student/CareerAbilityView.vue'),
+          path: 'tasks',
+          name: 'student-tasks',
+          component: () => import('../views/student/TaskList.vue'),
+        },
+        // 新增任务详情页面路由
+        {
+          path: 'quiz-task-detail',
+          name: 'student-quiz-task-detail',
+          component: () => import('../views/student/QuizTaskDetail.vue'),
+        },
+        {
+          path: 'self-task-detail',
+          name: 'student-self-task-detail',
+          component: () => import('../views/student/SelfTaskDetail.vue'),
+        },
+        {
+          path: 'report-task-detail',
+          name: 'student-report-task-detail',
+          component: () => import('../views/student/ReportTaskDetail.vue'),
         },
         // {
         //   path: 'self-study',
@@ -167,11 +183,6 @@ const router = createRouter({
           name: 'course-submission-list',
           component: () => import('../views/teacher/CourseSubmissionList.vue'),
         },
-        {
-          path: 'career-ability',
-          name: 'teacher-career-ability',
-          component: () => import('../views/teacher/CareerAbilityManager.vue'),
-        },
       ]
     },
     {
@@ -183,8 +194,8 @@ const router = createRouter({
       path: '/quiz',
       name: 'quiz',
       component: QuizVew,
-    }
-  ]
+    },
+  ],
 })
 
 export default router

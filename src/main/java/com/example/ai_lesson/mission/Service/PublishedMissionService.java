@@ -1,6 +1,8 @@
 package com.example.ai_lesson.mission.Service;
 
 import com.example.ai_lesson.mission.Domain.PublishedMission;
+import com.example.ai_lesson.mission.Domain.ReportResource;
+import com.example.ai_lesson.mission.Domain.ShowPublilshed;
 import com.example.ai_lesson.mission.Mapper.PublishedMissionMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -62,5 +64,21 @@ public class PublishedMissionService {
     
     public boolean deletePublishedMission(Integer id) {
         return publishedMissionMapper.deleteById(id) > 0;
+    }
+
+    public List<ShowPublilshed> showPublishedMissions() {
+        return publishedMissionMapper.showPublishedMissions();
+    }
+
+    public String showContent(Integer mission_id) {
+        return publishedMissionMapper.getContent(mission_id);
+    }
+
+    public ReportResource getResource(int resource_id) {
+        return publishedMissionMapper.getResource(resource_id);
+    }
+
+    public int updateScore(int mission_id, String student_id, int score) {
+        return publishedMissionMapper.updateScore(mission_id, student_id, score);
     }
 } 

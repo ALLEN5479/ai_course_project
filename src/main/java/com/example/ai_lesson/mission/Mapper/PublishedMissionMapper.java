@@ -1,6 +1,8 @@
 package com.example.ai_lesson.mission.Mapper;
 
 import com.example.ai_lesson.mission.Domain.PublishedMission;
+import com.example.ai_lesson.mission.Domain.ReportResource;
+import com.example.ai_lesson.mission.Domain.ShowPublilshed;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -66,4 +68,31 @@ public interface PublishedMissionMapper {
     
     @Delete("DELETE FROM published_mission WHERE id = #{id}")
     int deleteById(Integer id);
+
+    @Select("SELECT " +
+            "    mt.mission_id," +
+            "    mt.mission_name," +
+            "    mt.mission_description," +
+            "    mt.mission_type," +
+            "    pm.start_time," +
+            "    pm.end_time " +
+            "FROM " +
+            "    mission_template mt " +
+            "JOIN " +
+            "    published_mission pm ON mt.mission_id = pm.mission_id;")
+    List<ShowPublilshed> showPublishedMissions();
+
+    @Select("select content from mission_template where mission_id=#{mission_id}")
+    String getContent(Integer mission_id);
+
+    @Select("SELECT path, resource_name " +
+            "FROM mission_resource " +
+            "WHERE resource_id = #{resource_id}")
+    ReportResource getResource(int resource_id);
+
+    @Insert("INSERT INTO mission_student_score (mission_id, student_id, score) " +
+            "VALUES (#{mission_id}, #{student_id}, #{score}) " +
+            "ON DUPLICATE KEY UPDATE " +
+            "score = VALUES(score)")
+    int updateScore(@Param("mission_id") int mission_id, @Param("student_id") String student_id, @Param("score") int score);
 } 
