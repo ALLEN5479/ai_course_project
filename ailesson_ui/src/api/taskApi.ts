@@ -110,10 +110,16 @@ export const taskGradingApi = {
     return response.data
   },
 
-  // 提交批改结果
-  submitGrading: async (submissionId: number, data: any) => {
-    const response = await axios.put(`${BASE_URL}/api/task-grading/grade/${submissionId}`, data)
+  // 新增：通过missionId和studentId获取批改详情
+  getTaskGradingDetailByStudent: async ({ missionId, studentId }: { missionId: string, studentId: string }) => {
+    const response = await axios.get(`${BASE_URL}/api/task-grading/submission-detail`, { params: { missionId, studentId } })
     return response.data
+  },
+
+  // 提交批改结果
+  submitGrading: async (publishedMissionId: number, studentId: string, score: number) => {
+    const response = await axios.post(`${BASE_URL}/api/task-grading/report-score`, { publishedMissionId, studentId, score });
+    return response.data;
   },
 
   // 保存批改草稿

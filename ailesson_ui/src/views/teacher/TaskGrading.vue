@@ -6,36 +6,20 @@
       <span class="page-title">任务批改</span>
     </div>
 
-    <!-- 任务信息 -->
-    <div class="task-info-section">
-      <el-card>
-        <div class="task-header">
-          <h3>{{ taskInfo.taskName }}</h3>
-          <el-tag :type="taskInfo.status === 'pending' ? 'warning' : 'success'">
-            {{ taskInfo.status === 'pending' ? '待批改' : '已批改' }}
-          </el-tag>
-        </div>
-        <div class="task-details">
-          <div class="detail-item">
-            <span class="label">学生姓名：</span>
-            <span class="value">{{ taskInfo.studentName }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="label">提交时间：</span>
-            <span class="value">{{ taskInfo.submitTime }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="label">任务类型：</span>
-            <span class="value">{{ taskInfo.taskType }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="label">截止时间：</span>
-            <span class="value">{{ taskInfo.deadline }}</span>
-          </div>
-        </div>
-      </el-card>
+    <!-- 学生列表选择 -->
+    <div class="student-list-section" style="margin-bottom: 20px;">
+      <el-radio-group v-model="selectedStudentId" @change="onStudentChange">
+        <el-radio-button
+          v-for="student in studentList"
+          :key="student.studentId"
+          :label="student.studentId"
+        >
+          {{ student.studentName }}（{{ student.studentId }}）
+        </el-radio-button>
+      </el-radio-group>
     </div>
 
+    <!-- 任务信息 -->
     <!-- 报告显示区域 -->
     <div class="report-section">
       <el-card>
@@ -57,36 +41,29 @@
           <div class="report-icon">
             <el-icon size="80" color="#409EFF"><Document /></el-icon>
             <p>{{ taskInfo.reportName }}</p>
-            <p class="file-info">{{ taskInfo.fileSize }} | {{ taskInfo.fileType }}</p>
+            <p class="file-info">{{ taskInfo.fileType }}</p>
           </div>
           
           <!-- 报告预览区域 -->
-          <div v-if="showPreview" class="report-preview">
+          <div v-if="showPreview && taskInfo.reportUrl" class="report-preview">
             <div class="preview-header">
               <h5>报告预览</h5>
               <el-button size="small" @click="showPreview = false">关闭预览</el-button>
             </div>
             <div class="preview-content">
-              <div class="preview-text">
-                <h4>数据结构项目报告</h4>
-                <p><strong>学生：</strong>{{ taskInfo.studentName }}</p>
-                <p><strong>提交时间：</strong>{{ taskInfo.submitTime }}</p>
-                <hr>
-                <h5>1. 项目背景</h5>
-                <p>本项目旨在通过实现基本的数据结构来加深对算法和数据组织的理解。选择实现数组、链表、栈、队列等基础数据结构，并分析其性能特点。</p>
-                
-                <h5>2. 技术方案</h5>
-                <p>采用面向对象的设计方法，为每种数据结构创建独立的类。使用C++语言实现，确保代码的可读性和可维护性。</p>
-                
-                <h5>3. 实现过程</h5>
-                <p>首先实现了基础的数组结构，包括动态数组的扩容机制。然后实现了单链表和双链表，支持插入、删除、查找等操作。</p>
-                
-                <h5>4. 结果分析</h5>
-                <p>通过性能测试发现，数组在随机访问方面表现优异，而链表在插入删除操作上更有优势。栈和队列的实现验证了后进先出和先进先出的特性。</p>
-                
-                <h5>5. 总结与反思</h5>
-                <p>通过本次项目，深入理解了不同数据结构的特点和适用场景。在实现过程中遇到了一些挑战，如内存管理和边界条件处理，这些经验对今后的编程工作很有帮助。</p>
-              </div>
+              <template v-if="taskInfo.fileType === 'PDF'">
+                <iframe :src="taskInfo.reportUrl" width="100%" height="500px" style="border:none;"></iframe>
+              </template>
+              <template v-else-if="taskInfo.fileType === 'TXT'">
+                <iframe :src="taskInfo.reportUrl" width="100%" height="500px" style="border:none;"></iframe>
+              </template>
+              <template v-else-if="taskInfo.fileType === 'Word'">
+                <input type="file" accept=".docx" @change="onLocalDocxChange" />
+                <div v-html="docxHtml" style="margin-top:16px; border:1px solid #eee; padding:12px; background:#fafbfc;"></div>
+              </template>
+              <template v-else>
+                <p>暂不支持该类型文件的在线预览，请下载后查看。</p>
+              </template>
             </div>
           </div>
         </div>
@@ -105,44 +82,50 @@
         </div>
         
         <el-form :model="gradingForm" label-width="100px">
-          <el-form-item label="评分">
-            <el-input-number
-              v-model="gradingForm.score"
-              :min="0"
-              :max="100"
-              :precision="1"
-              placeholder="请输入分数（0-100）"
-            />
-            <span class="score-hint">满分100分</span>
+          <el-form-item v-if="hasGraded && !editingScore">
+            <el-tag type="success">已批改</el-tag>
+            <span style="margin-left: 12px;">评分：{{ gradedScore }}</span>
+            <el-button type="primary" size="small" @click="editingScore = true" style="margin-left: 16px;">更新成绩</el-button>
           </el-form-item>
-          
-          <el-form-item label="评价内容">
-            <el-input
-              v-model="gradingForm.comment"
-              type="textarea"
-              :rows="6"
-              placeholder="请输入评价内容，包括优点、不足和改进建议..."
-            />
-          </el-form-item>
-          
-          <el-form-item label="评价标签">
-            <el-checkbox-group v-model="gradingForm.tags">
-              <el-checkbox label="内容完整">内容完整</el-checkbox>
-              <el-checkbox label="逻辑清晰">逻辑清晰</el-checkbox>
-              <el-checkbox label="创新性强">创新性强</el-checkbox>
-              <el-checkbox label="格式规范">格式规范</el-checkbox>
-              <el-checkbox label="技术深度">技术深度</el-checkbox>
-              <el-checkbox label="按时提交">按时提交</el-checkbox>
-            </el-checkbox-group>
-          </el-form-item>
-          
-          <el-form-item>
-            <el-button type="primary" @click="submitGrading" :loading="submitting">
-              {{ submitting ? '提交中...' : '提交批改' }}
-            </el-button>
-            <el-button @click="saveDraft">保存草稿</el-button>
-            <el-button @click="resetForm">重置</el-button>
-          </el-form-item>
+          <template v-else>
+            <el-form-item label="评分">
+              <el-input-number
+                v-model="gradingForm.score"
+                :min="0"
+                :max="100"
+                :precision="1"
+                placeholder="请输入分数（0-100）"
+              />
+              <span class="score-hint">满分100分</span>
+            </el-form-item>
+            
+            <el-form-item label="评价内容">
+              <el-input
+                v-model="gradingForm.comment"
+                type="textarea"
+                :rows="6"
+                placeholder="请输入评价内容，包括优点、不足和改进建议..."
+              />
+            </el-form-item>
+            
+            <el-form-item label="评价标签">
+              <el-checkbox-group v-model="gradingForm.tags">
+                <el-checkbox label="内容完整">内容完整</el-checkbox>
+                <el-checkbox label="逻辑清晰">逻辑清晰</el-checkbox>
+                <el-checkbox label="创新性强">创新性强</el-checkbox>
+                <el-checkbox label="格式规范">格式规范</el-checkbox>
+                <el-checkbox label="技术深度">技术深度</el-checkbox>
+                <el-checkbox label="按时提交">按时提交</el-checkbox>
+              </el-checkbox-group>
+            </el-form-item>
+            
+            <el-form-item>
+              <el-button type="primary" @click="submitGrading" :loading="submitting">
+                {{ submitting ? '提交中...' : '提交批改' }}
+              </el-button>
+              <el-button @click="resetForm">重置</el-button>
+            </el-form-item>
+          </template>
         </el-form>
       </el-card>
     </div>
@@ -187,6 +170,8 @@ import { useRouter, useRoute } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import { View, Download, Document, MagicStick } from '@element-plus/icons-vue';
 import { taskGradingApi } from '@/api/taskApi';
+import axios from 'axios';
+import * as mammoth from 'mammoth';
 
 const router = useRouter();
 const route = useRoute();
@@ -201,6 +186,7 @@ interface TaskInfo {
   reportName: string;
   fileSize: string;
   fileType: string;
+  reportUrl: string;
 }
 
 interface GradingForm {
@@ -219,7 +205,8 @@ const taskInfo = reactive<TaskInfo>({
   status: 'pending',
   reportName: '',
   fileSize: '',
-  fileType: ''
+  fileType: '',
+  reportUrl: ''
 });
 
 // 批改表单
@@ -233,6 +220,7 @@ const gradingForm = reactive<GradingForm>({
 const showPreview = ref(false);
 const submitting = ref(false);
 const aiDialogVisible = ref(false);
+const editingScore = ref(false);
 
 // AI分析结果
 const aiAnalysis = reactive({
@@ -241,32 +229,99 @@ const aiAnalysis = reactive({
   tags: ['内容完整', '逻辑清晰', '技术深度', '格式规范']
 });
 
-// 获取任务批改详情
-const fetchTaskGradingDetail = async (submissionId: number) => {
+// 学生列表
+const studentList = ref<{ studentId: string; studentName: string }[]>([]);
+const selectedStudentId = ref<string>('');
+
+// 获取学生列表
+const fetchStudentList = async (publishedMissionId: string) => {
   try {
-    const response = await taskGradingApi.getTaskGradingDetail(submissionId);
-    const data = response.data;
-    
-    // 填充任务信息
-    taskInfo.taskName = data.taskName;
-    taskInfo.studentName = data.studentName;
-    taskInfo.submitTime = data.submitTime;
-    taskInfo.taskType = data.taskType;
-    taskInfo.deadline = data.deadline;
-    taskInfo.status = data.status;
-    taskInfo.reportName = data.reportName;
-    taskInfo.fileSize = data.fileSize;
-    taskInfo.fileType = data.fileType;
-    
-    // 如果已经批改过，填充批改信息
-    if (data.grading) {
-      gradingForm.score = data.grading.score;
-      gradingForm.comment = data.grading.comment;
-      gradingForm.tags = data.grading.tags || [];
+    // 新接口，直接用publishedMissionId
+    const { data } = await axios.get(`http://localhost:8080/api/task-grading/students`, { params: { publishedMissionId } });
+    if (Array.isArray(data)) {
+      studentList.value = data;
+      if (data.length > 0) {
+        selectedStudentId.value = data[0].studentId;
+        await fetchStudentReport(publishedMissionId, selectedStudentId.value);
+      }
     }
-  } catch (error) {
-    console.error('获取任务批改详情失败:', error);
-    ElMessage.error('获取任务批改详情失败');
+  } catch (e) {
+    ElMessage.error('获取学生列表失败');
+  }
+};
+
+// 获取学生报告
+const fetchStudentReport = async (publishedMissionId: string, studentId: string) => {
+  try {
+    const missionIdResp = await axios.get(`http://localhost:8080/api/task-grading/published-mission/mission-id`, { params: { publishedMissionId } });
+    const missionId = missionIdResp.data.missionId;
+    const url = `http://localhost:8080/api/task-grading/student-report?missionId=${missionId}&studentId=${studentId}`;
+    const { data } = await axios.get(url);
+    taskInfo.reportName = data.report_name;
+    taskInfo.reportUrl = data.report_url;
+    // 可根据report_url后缀判断类型
+    const ext = data.report_url?.split('.').pop()?.toLowerCase();
+    if (ext === 'pdf') {
+      taskInfo.fileType = 'PDF';
+    } else if (ext === 'doc' || ext === 'docx') {
+      taskInfo.fileType = 'Word';
+    } else if (ext === 'txt') {
+      taskInfo.fileType = 'TXT';
+    } else {
+      taskInfo.fileType = '未知';
+    }
+  } catch (e) {
+    taskInfo.reportName = '';
+    taskInfo.reportUrl = '';
+    taskInfo.fileType = '';
+    ElMessage.error('获取学生报告失败');
+  }
+};
+
+const hasGraded = ref(false);
+const gradedScore = ref<number|null>(null);
+
+const fetchStudentScore = async (publishedMissionId: string, studentId: string) => {
+  try {
+    const { data } = await axios.get('http://localhost:8080/api/task-grading/score', {
+      params: { publishedMissionId, studentId }
+    });
+    if (typeof data === 'number' && !isNaN(data)) {
+      hasGraded.value = true;
+      gradedScore.value = data;
+      editingScore.value = false; // 查询到分数时默认关闭编辑
+    } else {
+      hasGraded.value = false;
+      gradedScore.value = null;
+      editingScore.value = false;
+    }
+  } catch (e) {
+    hasGraded.value = false;
+    gradedScore.value = null;
+    editingScore.value = false;
+  }
+};
+
+// 在切换学生和页面加载时调用
+onMounted(async () => {
+  const publishedMissionId = route.query.publishedMissionId as string | undefined;
+  if (typeof publishedMissionId === 'string' && publishedMissionId) {
+    await fetchStudentList(publishedMissionId);
+    if (selectedStudentId.value) {
+      await fetchStudentReport(publishedMissionId, selectedStudentId.value);
+      await fetchStudentScore(publishedMissionId, selectedStudentId.value);
+    }
+  }
+});
+
+const onStudentChange = async () => {
+  editingScore.value = false;
+  if (selectedStudentId.value) {
+    const publishedMissionId = route.query.publishedMissionId as string | undefined;
+    if (typeof publishedMissionId === 'string' && publishedMissionId) {
+      await fetchStudentReport(publishedMissionId, selectedStudentId.value);
+      await fetchStudentScore(publishedMissionId, selectedStudentId.value);
+    }
   }
 };
 
@@ -280,7 +335,11 @@ function previewReport() {
 }
 
 function downloadReport() {
-  ElMessage.success('报告下载成功！');
+  if (taskInfo.reportUrl) {
+    window.open(taskInfo.reportUrl, '_blank');
+  } else {
+    ElMessage.error('暂无可下载的报告');
+  }
 }
 
 function aiAssistGrading() {
@@ -301,30 +360,25 @@ function applyAiGrading() {
 }
 
 async function submitGrading() {
-  if (!gradingForm.score) {
-    ElMessage.warning('请填写评分');
+  const publishedMissionId = route.query.publishedMissionId as string | undefined;
+  if (!publishedMissionId) {
+    ElMessage.error('缺少任务ID参数');
     return;
   }
-  if (!gradingForm.comment.trim()) {
-    ElMessage.warning('请填写评价内容');
-    return;
-  }
-  
-  submitting.value = true;
-  
+  const studentId = selectedStudentId.value;
+  const score = gradingForm.score;
   try {
-    const submissionId = parseInt(route.query.submissionId as string);
-    await taskGradingApi.submitGrading(submissionId, {
-      score: gradingForm.score,
-      comment: gradingForm.comment,
-      tags: gradingForm.tags
-    });
-    
-    taskInfo.status = 'graded';
-    ElMessage.success('批改提交成功！');
-  } catch (error) {
-    console.error('提交批改失败:', error);
-    ElMessage.error('提交批改失败');
+    submitting.value = true;
+    await taskGradingApi.submitGrading(
+      Number(publishedMissionId),
+      String(studentId),
+      Number(score)
+    );
+    ElMessage.success('批改分数保存成功');
+    editingScore.value = false;
+    // 其他刷新逻辑
+  } catch (e) {
+    ElMessage.error('保存失败');
   } finally {
     submitting.value = false;
   }
@@ -353,16 +407,32 @@ function resetForm() {
   ElMessage.info('表单已重置');
 }
 
-// 生命周期
-onMounted(() => {
-  // 从路由参数获取任务ID
-  const submissionId = route.query.submissionId;
-  if (submissionId) {
-    fetchTaskGradingDetail(parseInt(submissionId as string));
-  } else {
-    ElMessage.error('缺少任务提交ID参数');
+// 获取完整URL用于Microsoft Office Online预览
+function getFullUrl(relativeUrl: string): string {
+  return `${window.location.origin}/${relativeUrl}`;
+}
+
+const docxHtml = ref('');
+const isLocalDocx = ref(false);
+
+function onLocalDocxChange(e: Event) {
+  const input = e.target as HTMLInputElement;
+  const file = input.files && input.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      const arrayBuffer = evt.target?.result;
+      if (arrayBuffer && arrayBuffer instanceof ArrayBuffer) {
+        const result = await mammoth.convertToHtml({ arrayBuffer });
+        docxHtml.value = result.value;
+        isLocalDocx.value = true;
+      }
+    };
+    reader.readAsArrayBuffer(file);
   }
-});
+}
+
+// 生命周期
 </script>
 
 <style scoped>
