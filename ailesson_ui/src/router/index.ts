@@ -106,6 +106,11 @@ const router = createRouter({
           name: 'student-personal',
           component: () => import('../views/student/StudentPersonal.vue'),
         },
+        {
+          path: 'career-ability',
+          name: 'student-career-ability',
+          component: () => import('../views/student/CareerAbilityView.vue'),
+        },
       ]
     },
     {
