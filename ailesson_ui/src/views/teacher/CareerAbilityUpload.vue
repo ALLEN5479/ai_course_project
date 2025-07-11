@@ -114,10 +114,11 @@ const handleSuccess = (response: any) => {
   uploadProgress.value = 100
   if (response.code === 200) {
     ElMessage.success('文件上传成功')
-    previewData.value = response.data.preview || []
+    previewData.value = (response.data && response.data.preview) ? response.data.preview : []
     emit('upload-success', response.data)
   } else {
-    ElMessage.error(response.message || '上传失败')
+    ElMessage.error(response.msg || '上传失败')
+    previewData.value = []
   }
 }
 

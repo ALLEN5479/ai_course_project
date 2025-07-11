@@ -5,18 +5,22 @@ export function getStudentCareerAbility(studentId: string) {
 }
 
 export function getCareerAbilityList(params: any) {
-  return request.get('/api/career/ability/list', { params })
+  return request.get('/career/ability/list', { params })
 }
 
 export function generateAiReport(studentId: string) {
-  return request.post(`/api/career/ability/ai-report/${studentId}`)
+  return request.post(`/career/ability/ai-report/${studentId}`)
 }
 
 export function uploadCareerAbilityData(file: File) {
   const formData = new FormData()
   formData.append('file', file)
   formData.append('type', 'career_ability')
-  return request.post('/api/career/ability/upload', formData, {
+  return request.post('/career/ability/upload', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   })
+}
+
+export function deleteCareerAbility(studentId: string) {
+  return request.delete(`/career/ability/delete/${studentId}`)
 }

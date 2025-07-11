@@ -162,12 +162,12 @@ let lastResourceId = ref<number | null>(null)
 
 // 记录上报函数
 const reportRecord = async () => {
-  console.log(userId.value+','+lastResourceId.value+','+currentStudyTime.value+','+currentSeekCount.value)
-  if (!userId.value || !lastResourceId.value) return
+  console.log(userId+','+lastResourceId.value+','+currentStudyTime.value+','+currentSeekCount.value)
+  if (!userId || !lastResourceId.value) return
   try {
     await axios.post('http://localhost:8080/updateRecord', null, {
       params: {
-        student_id: userId.value,
+        student_id: userId,
         resource_id: lastResourceId.value,
         actual_time: (currentStudyTime.value/1000).toFixed(2),
         jump_time: currentSeekCount.value
@@ -263,7 +263,7 @@ watch(selectedResource, async (newVal) => {
   }
 })
 
-const userId = computed(() => route.query.user_id ? Number(route.query.user_id) : 0)
+const userId = localStorage.getItem('user_id') || ''
 
 // AI分析相关变量
 const showAiAnalysis = ref(false)

@@ -23,7 +23,7 @@ api.interceptors.response.use(
 // 能力图谱相关API
 export const abilityApi = {
   // 获取学生能力图谱数据
-  getCapabilityMap(studentId: number) {
+  getCapabilityMap(studentId: number): Promise<{ code: number; data: any }> {
     return api.get(`/student/ability/capability-map/${studentId}`)
   },
 

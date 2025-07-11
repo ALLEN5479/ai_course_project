@@ -84,4 +84,17 @@ public class StudentAbilityController {
             return AjaxResult.error("更新失败: " + e.getMessage());
         }
     }
+
+    /**
+     * 更新学习主动性分数
+     */
+    @PostMapping("/update-initiative/{studentId}")
+    public AjaxResult updateInitiative(@PathVariable Long studentId) {
+        try {
+            studentAbilityService.updateInitiativeAbility(studentId);
+            return AjaxResult.success("学习主动性分数已更新");
+        } catch (Exception e) {
+            return AjaxResult.error("更新失败: " + e.getMessage());
+        }
+    }
 }

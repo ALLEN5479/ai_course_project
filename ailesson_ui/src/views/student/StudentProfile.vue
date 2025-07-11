@@ -38,13 +38,19 @@
 </template>
 
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import AbilityRadarChart from './ability/AbilityRadarChart.vue'
 import { ref, onMounted } from 'vue'
 
 const router = useRouter()
 const goBack = () => {
-  router.push('/student/dashboard')
+  router.push({
+    path: '/student/dashboard',
+    query: {
+      user_id: userInfo.value.user_id,
+      name: userInfo.value.name
+    }
+  })
 }
 
 // 读取用户信息
@@ -57,9 +63,7 @@ onMounted(() => {
   }
 })
 
-const userId = userInfo.value.user_id || 
-  (JSON.parse(localStorage.getItem('userInfo') || '{}').user_id) || 
-  ''
+const userId = localStorage.getItem('user_id') || ''
 </script>
 
 <style scoped>

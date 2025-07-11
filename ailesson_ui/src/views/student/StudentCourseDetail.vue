@@ -174,12 +174,14 @@ const missionTypes = [
 // 任务列表
 const missions = ref<any[]>([])
 
+const userId = localStorage.getItem('user_id') || ''
+
 // 获取课程信息
 const fetchCourseInfo = async () => {
   try {
     // 获取课程基本信息
     const { data: courseData } = await axios.get(`http://localhost:8080/student/courses/${courseId}`, {
-      params: { user_id: routeParams.value.user_id }
+      params: { user_id: userId }
     })
     
     // 获取教师姓名

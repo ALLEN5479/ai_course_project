@@ -42,8 +42,8 @@ const route = useRoute()
 
 const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
 const routeParams = ref({
-  user_id: route.query.user_id || userInfo.user_id || '',
-  name: route.query.name || userInfo.name || ''
+  user_id: localStorage.getItem('user_id') || '',
+  name: localStorage.getItem('student_name') || ''
 })
 
 // 课程数据（初始为空数组）
@@ -125,8 +125,8 @@ const goBack = () => {
 onMounted(() => {
   // 更新路由参数
   routeParams.value = {
-    user_id: route.query.user_id || userInfo.user_id || '',
-    name: route.query.name || userInfo.name || ''
+    user_id: localStorage.getItem('user_id') || '',
+    name: localStorage.getItem('student_name') || ''
   }
 
   // 获取课程数据
