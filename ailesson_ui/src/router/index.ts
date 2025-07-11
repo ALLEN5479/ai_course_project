@@ -188,6 +188,11 @@ const router = createRouter({
           name: 'course-submission-list',
           component: () => import('../views/teacher/CourseSubmissionList.vue'),
         },
+        {
+          path: 'career-ability',
+          name: 'teacher-career-ability',
+          component: () => import('../views/teacher/CareerAbilityManager.vue'),
+        },
       ]
     },
     {
