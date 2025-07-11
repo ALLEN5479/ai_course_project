@@ -55,4 +55,9 @@ public interface StudentAbilityService {
      * 获取某学生某能力点的ELO分数
      */
     Double getEloByStudentIdAndAbilityType(Long studentId, String abilityType);
+    
+    /**
+     * 更新学习主动性能力分数
+     */
+    void updateInitiativeAbility(Long studentId);
 }

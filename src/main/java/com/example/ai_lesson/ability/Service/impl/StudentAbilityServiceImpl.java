@@ -7,6 +7,8 @@ import com.example.ai_lesson.ability.Domain.StudentAbility;
 import com.example.ai_lesson.aiquestion.entity.QuizAnswerRecord;
 import com.example.ai_lesson.ability.Mapper.StudentAbilityMapper;
 import com.example.ai_lesson.ability.Service.StudentAbilityService;
+import com.example.ai_lesson.study_resources.entity.StudentResourceRecord;
+import com.example.ai_lesson.study_resources.mapper.RecordMapper;
 
 import java.util.List;
 import java.util.Date;
@@ -15,6 +17,9 @@ import java.util.Date;
 public class StudentAbilityServiceImpl implements StudentAbilityService {
     @Autowired
     private StudentAbilityMapper studentAbilityMapper;
+
+    @Autowired
+    private RecordMapper recordMapper;
 
     @Override
     public List<StudentAbility> getByStudentId(Long studentId) {
@@ -106,5 +111,34 @@ public class StudentAbilityServiceImpl implements StudentAbilityService {
             theta = Math.min(theta, 2500);
         }
         return theta;
+    }
+
+    @Override
+    public void updateInitiativeAbility(Long studentId) {
+        List<StudentResourceRecord> records = recordMapper.selectByStudentId(studentId.toString());
+        double totalTime = 0;
+        int totalJump = 0;
+        for (StudentResourceRecord r : records) {
+            totalTime += r.getActual_learning_time() != null ? r.getActual_learning_time() : 0;
+            totalJump += r.getJump_time() != null ? r.getJump_time() : 0;
+        }
+        double score = 1500 + (totalTime / 60) * 10 - totalJump * 5;
+        score = Math.max(1000, Math.min(2000, score));
+        // 4. 更新student_ability表
+        StudentAbility ability = studentAbilityMapper.selectStudentAbilityByStudentIdAndAbilityType(studentId, "initiative");
+        if (ability == null) {
+            ability = new StudentAbility();
+            ability.setStudentId(studentId);
+            ability.setAbilityType("initiative");
+            ability.setEloScore(score);
+            ability.setKFactor(16);
+            ability.setCreateTime(new Date());
+            ability.setUpdateTime(new Date());
+            studentAbilityMapper.insertStudentAbility(ability);
+        } else {
+            ability.setEloScore(score);
+            ability.setUpdateTime(new Date());
+            studentAbilityMapper.updateStudentAbility(ability);
+        }
     }
 }

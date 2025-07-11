@@ -5,12 +5,6 @@
     <resultMap id="StudentAbilityMap" type="com.example.ai_lesson.ability.Domain.StudentAbility">
         <id property="id" column="id"/>
         <result property="studentId" column="student_id"/>
-        <result property="studentName" column="student_name"/>
-        <result property="programmingScore" column="programming_score"/>
-        <result property="aiScore" column="ai_score"/>
-        <result property="mathScore" column="math_score"/>
-        <result property="creativityScore" column="creativity_score"/>
-        <result property="communicationScore" column="communication_score"/>
         <result property="abilityType" column="ability_type"/>
         <result property="eloScore" column="elo_score"/>
         <result property="kFactor" column="k_factor"/>
@@ -18,24 +12,18 @@
         <result property="updateTime" column="update_time"/>
     </resultMap>
     <select id="selectStudentAbilityByStudentId" resultMap="StudentAbilityMap">
-        SELECT id, student_id, student_name, programming_score, ai_score, math_score, 
-               creativity_score, communication_score, ability_type, elo_score, k_factor,
-               create_time, update_time
+        SELECT id, student_id, ability_type, elo_score, k_factor, create_time, update_time
         FROM student_ability
         WHERE student_id = #{studentId}
     </select>
     <select id="selectStudentAbilityById" resultMap="StudentAbilityMap">
-        SELECT id, student_id, student_name, programming_score, ai_score, math_score, 
-               creativity_score, communication_score, ability_type, elo_score, k_factor,
-               create_time, update_time
+        SELECT id, student_id, ability_type, elo_score, k_factor, create_time, update_time
         FROM student_ability
         WHERE student_id = #{studentId}
         LIMIT 1
     </select>
     <select id="selectAllStudentsAbility" resultMap="StudentAbilityMap">
-        SELECT id, student_id, student_name, programming_score, ai_score, math_score, 
-               creativity_score, communication_score, ability_type, elo_score, k_factor,
-               create_time, update_time
+        SELECT id, student_id, ability_type, elo_score, k_factor, create_time, update_time
         FROM student_ability
         ORDER BY student_id
     </select>
