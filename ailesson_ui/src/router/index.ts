@@ -106,6 +106,11 @@ const router = createRouter({
           name: 'student-personal',
           component: () => import('../views/student/StudentPersonal.vue'),
         },
+        {
+          path: 'career-ability',
+          name: 'student-career-ability',
+          component: () => import('../views/student/CareerAbilityView.vue'),
+        },
       ]
     },
     {
@@ -182,6 +187,11 @@ const router = createRouter({
           path: 'course-submission-list',
           name: 'course-submission-list',
           component: () => import('../views/teacher/CourseSubmissionList.vue'),
+        },
+        {
+          path: 'career-ability',
+          name: 'teacher-career-ability',
+          component: () => import('../views/teacher/CareerAbilityManager.vue'),
         },
       ]
     },
