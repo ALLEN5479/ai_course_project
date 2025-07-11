@@ -112,7 +112,7 @@ const submitting = ref(false)
 const uploadedFileInfo = ref<any>(null)
 const uploadRef = ref()
 
-const uploadUrl = 'http://localhost:8080/api/task-manager/report/upload' // 使用新的学生报告上传接口
+const uploadUrl = 'http://localhost:8080/api/task-manager/report/upload'
 
 function goBack() {
   router.back()

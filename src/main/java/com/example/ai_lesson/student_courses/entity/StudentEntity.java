@@ -9,6 +9,9 @@ public class StudentEntity {
         this.name = name;
     }
 
+    public StudentEntity() {
+    }
+
     public String getStudent_id() {
         return student_id;
     }

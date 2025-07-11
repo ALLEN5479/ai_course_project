@@ -16,6 +16,9 @@ public class StudentInfoService {
     }
 
     public void saveOrUpdateStudentInfo(StudentInfoEntity studentInfo) {
+        if (studentInfo == null) {
+            throw new IllegalArgumentException("studentInfo不能为null");
+        }
         // 如果已存在则更新，否则插入
         if (studentInfoMapper.selectByUserId(studentInfo.getUser_id()) != null) {
             studentInfoMapper.updateStudentInfo(studentInfo);
