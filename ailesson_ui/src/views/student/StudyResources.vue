@@ -4,6 +4,8 @@ import { computed, ref, onMounted, watch, nextTick, onBeforeUnmount } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { Document, VideoCamera, Files, Monitor, ArrowLeft, ArrowRight, MagicStick } from '@element-plus/icons-vue'
 import axios from 'axios'
+import VueOfficeDocx from '@vue-office/docx'
+import VueOfficePptx from '@vue-office/pptx'
 import { ElMessage, ElLoading } from 'element-plus'
 
 
@@ -275,21 +277,21 @@ const analyzeResource = async () => {
     ElMessage.warning('请先选择一个资源')
     return
   }
-  
+
   // 检查资源类型是否支持AI分析
   if (selectedResource.value.res_type === 'video') {
     ElMessage.warning('视频资源暂不支持AI分析')
     return
   }
-  
+
   aiAnalysisLoading.value = true
   currentAnalyzingResource.value = selectedResource.value
-  
+
   try {
     const response = await axios.get('http://localhost:8080/analyzeResource', {
       params: { resource_id: selectedResource.value.resource_id }
     })
-    
+
     if (response.data.success) {
       aiAnalysisResult.value = response.data.analysis
       showAiAnalysis.value = true
@@ -314,7 +316,7 @@ const closeAiAnalysis = () => {
 // 格式化AI分析结果
 const formatAnalysisResult = (content: string) => {
   if (!content) return ''
-  
+
   return content
     .replace(/\n/g, '<br>')
     .replace(/^(\d+\.\s*)/gm, '<strong>$1</strong>')
@@ -392,9 +394,9 @@ const formatAnalysisResult = (content: string) => {
               <!-- AI分析按钮 -->
               <div v-if="selectedResource" class="ai-analysis-header">
                 <h3>{{ selectedResource.resource_name }}</h3>
-                <el-button 
-                  type="primary" 
-                  :icon="MagicStick" 
+                <el-button
+                  type="primary"
+                  :icon="MagicStick"
                   @click="analyzeResource"
                   :loading="aiAnalysisLoading"
                   :disabled="selectedResource.res_type === 'video'"
@@ -403,7 +405,7 @@ const formatAnalysisResult = (content: string) => {
                   {{ aiAnalysisLoading ? 'AI分析中...' : 'AI分析' }}
                 </el-button>
               </div>
-              
+
               <template v-if="selectedResource">
 
                 <template v-if="selectedResource.res_type === 'pdf'">
@@ -414,12 +416,12 @@ const formatAnalysisResult = (content: string) => {
                 </template>
                 <template v-else-if="selectedResource.res_type === 'word'">
                   <div style="text-align:center;margin-top:20px">
-                    <el-link :href="selectedResource.resource_url" target="_blank">下载Word文档</el-link>
+                    <vue-office-docx :file="selectedResource.resource_url" width="100%" height="600px"></vue-office-docx>
                   </div>
                 </template>
                 <template v-else-if="selectedResource.res_type === 'ppt'">
                   <div style="text-align:center;margin-top:20px">
-                    <el-link :href="selectedResource.resource_url" target="_blank">下载PPT文件</el-link>
+                    <vue-office-pptx :file="selectedResource.resource_url" width="100%" height="600px"></vue-office-pptx>
                   </div>
                 </template>
                 <template v-else>
@@ -452,15 +454,15 @@ const formatAnalysisResult = (content: string) => {
       <div v-if="currentAnalyzingResource" class="analysis-header">
         <h4>分析资源：{{ currentAnalyzingResource.resource_name }}</h4>
         <p class="resource-info">
-          类型：{{ currentAnalyzingResource.res_type }} | 
+          类型：{{ currentAnalyzingResource.res_type }} |
           描述：{{ currentAnalyzingResource.res_description || '无描述' }}
         </p>
       </div>
-      
+
       <div class="analysis-content">
         <div class="analysis-result" v-html="formatAnalysisResult(aiAnalysisResult)"></div>
       </div>
-      
+
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="closeAiAnalysis">关闭</el-button>

@@ -38,6 +38,9 @@ public interface MissionSubmissionMapper {
             "WHERE submission_id = #{submissionId}")
     int updateGrade(MissionSubmission missionSubmission);
     
+    @Update("UPDATE mission_submission SET score = #{score}, comment = #{comment}, grade_status = 'graded', grade_time = NOW() WHERE published_mission_id = #{missionId} AND student_id = #{studentId}")
+    int updateGradeByMissionAndStudent(@Param("missionId") Integer missionId, @Param("studentId") Integer studentId, @Param("score") Integer score, @Param("comment") String comment);
+    
     @Update("UPDATE mission_submission SET score = #{score}, comment = #{comment}, " +
             "grade_status = 'graded', grade_time = NOW(), grader_id = #{graderId} " +
             "WHERE published_mission_id = #{publishedMissionId} AND submission_id IN " +

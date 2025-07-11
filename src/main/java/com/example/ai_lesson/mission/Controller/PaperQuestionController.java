@@ -1,6 +1,7 @@
 package com.example.ai_lesson.mission.Controller;
 
 import com.example.ai_lesson.mission.Domain.PaperQuestion;
+import com.example.ai_lesson.mission.Domain.ShowQuiz;
 import com.example.ai_lesson.mission.Service.PaperQuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -156,5 +157,15 @@ public class PaperQuestionController {
             response.put("message", "删除试卷题目失败: " + e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
+    }
+
+    @GetMapping("/showQuizs")
+    public List<ShowQuiz> showQuizs(int paper_id){
+        return paperQuestionService.showQuizs(paper_id);
+    }
+
+    @GetMapping("/updateJudge")
+    public int updateJudge(int question_id, String student_id, int judge){
+        return paperQuestionService.updateJudge(question_id, student_id, judge);
     }
 } 
