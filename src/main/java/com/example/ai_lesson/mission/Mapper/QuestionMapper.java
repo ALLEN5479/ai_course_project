@@ -1,6 +1,7 @@
 package com.example.ai_lesson.mission.Mapper;
 
 import com.example.ai_lesson.mission.Domain.Question;
+import com.example.ai_lesson.mission.Domain.ShowQuiz;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;

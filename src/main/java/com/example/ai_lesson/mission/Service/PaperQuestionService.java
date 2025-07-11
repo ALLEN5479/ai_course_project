@@ -1,6 +1,7 @@
 package com.example.ai_lesson.mission.Service;
 
 import com.example.ai_lesson.mission.Domain.PaperQuestion;
+import com.example.ai_lesson.mission.Domain.ShowQuiz;
 import com.example.ai_lesson.mission.Mapper.PaperQuestionMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,5 +46,13 @@ public class PaperQuestionService {
     
     public Map<String, Object> getQuestionDetailById(Integer questionId) {
         return paperQuestionMapper.findQuestionDetailById(questionId);
+    }
+
+    public List<ShowQuiz> showQuizs(int paper_id){
+        return paperQuestionMapper.showQuiz(paper_id);
+    }
+
+    public int updateJudge(int question_id, String student_id, int judge){
+        return paperQuestionMapper.updateJudge(question_id, student_id, judge);
     }
 } 

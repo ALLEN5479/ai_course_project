@@ -1,6 +1,8 @@
 package com.example.ai_lesson.mission.Mapper;
 
 import com.example.ai_lesson.mission.Domain.PaperQuestion;
+import com.example.ai_lesson.mission.Domain.ReportResource;
+import com.example.ai_lesson.mission.Domain.ShowQuiz;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -51,4 +53,25 @@ public interface PaperQuestionMapper {
       "</script>"
     })
     List<Map<String, Object>> findQuestionDetailsByPaperId(@Param("paperId") Integer paperId);
+
+    @Select("SELECT " +
+            "    q.question_text," +
+            "    q.option_a," +
+            "    q.option_b," +
+            "    q.option_c," +
+            "    q.option_d," +
+            "    q.correct_answer," +
+            "    pq.score "+
+            "FROM " +
+            "    paper_question pq " +
+            "JOIN " +
+            "    questions q ON pq.question_id = q.id " +
+            "WHERE " +
+            "    pq.paper_id = #{paper_id}")
+    List<ShowQuiz> showQuiz(int paper_id);
+
+    @Insert("INSERT INTO question_student_judge (question_id, student_id, judge) " +
+            "VALUES (#{question_id}, #{student_id}, #{judge}) " +
+            "ON DUPLICATE KEY UPDATE judge = VALUES(judge)")
+    int updateJudge(@Param("question_id") int question_id, @Param("student_id") String student_id, @Param("judge") int judge);
 } 

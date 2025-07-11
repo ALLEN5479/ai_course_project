@@ -11,6 +11,9 @@ public class ManagementEntity {
         this.course_name = course_name;
     }
 
+    public ManagementEntity() {
+    }
+
     public String getStudent_id() {
         return student_id;
     }

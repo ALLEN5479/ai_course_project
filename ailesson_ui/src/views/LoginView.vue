@@ -221,7 +221,6 @@ const handleLogin = async () => {
         password: loginForm.password
       }
     })
-    console.log('login response:', res)
     if (res.data.code === 200) {
       localStorage.setItem('userInfo', JSON.stringify(res.data.data))
       localStorage.setItem('user_id', res.data.data.user_id)
@@ -233,8 +232,8 @@ const handleLogin = async () => {
         router.push({ 
           path: '/teacher/dashboard', 
           query: { 
-            teacherId: loginForm.userNumber,
-            teacherName: loginForm.password
+            teacherId: res.data.data.user_id,
+            teacherName: res.data.data.name,
           } 
         })
       } else {

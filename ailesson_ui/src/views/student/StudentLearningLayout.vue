@@ -46,6 +46,7 @@ import { Document, Connection, Edit } from '@element-plus/icons-vue'
 import StudentCourseDetail from './StudentCourseDetail.vue'
 import KnowledgeGraph from './KnowledgeGraph.vue'
 import MissionView from './MissionView.vue'
+import TaskList from "@/views/student/TaskList.vue";
 
 // 侧栏导航状态
 const activeMenu = ref('courseDetail')
@@ -62,7 +63,7 @@ const currentComponent = computed(() => {
   switch (activeMenu.value) {
     case 'courseDetail': return StudentCourseDetail
     case 'knowledgeGraph': return KnowledgeGraph
-    case 'mission': return MissionView
+    case 'mission': return TaskList
     default: return StudentCourseDetail
   }
 })
