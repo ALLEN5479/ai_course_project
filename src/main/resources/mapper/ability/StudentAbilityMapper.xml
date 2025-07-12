@@ -40,26 +40,24 @@
             quiz_answer_record
         WHERE
             student_id = #{studentId}
-        ORDER BY submit_time
+        ORDER BY create_time
     </select>
     <insert id="insertQuestionRecord" parameterType="com.example.ai_lesson.aiquestion.entity.QuizAnswerRecord">
-        INSERT INTO question_record
-        (student_id, question_id, course_id, is_correct, answer, used_time, score, difficulty, ability_type)
+        INSERT INTO quiz_answer_record
+        (student_id, question_id, is_correct, answer, used_time, score, difficulty, ability_type)
         VALUES
-        (#{studentId}, #{questionId}, #{courseId}, #{isCorrect}, #{answer}, #{usedTime}, #{score}, #{difficulty}, #{abilityType})
+        (#{studentId}, #{questionId}, #{isCorrect}, #{answer}, #{usedTime}, #{score}, #{difficulty}, #{abilityType})
     </insert>
     <select id="selectRecordsByStudentIdAndAbilityType" resultType="com.example.ai_lesson.aiquestion.entity.QuizAnswerRecord">
-        SELECT * FROM question_record
+        SELECT * FROM quiz_answer_record
         WHERE student_id = #{studentId} AND ability_type = #{abilityType}
         ORDER BY create_time
     </select>
     <insert id="insertStudentAbility" parameterType="com.example.ai_lesson.ability.Domain.StudentAbility">
         INSERT INTO student_ability
-        (student_id, student_name, programming_score, ai_score, math_score, creativity_score, 
-         communication_score, ability_type, elo_score, k_factor, create_time, update_time)
+        (student_id, student_name, ability_type, elo_score, k_factor, create_time, update_time)
         VALUES
-        (#{studentId}, #{studentName}, #{programmingScore}, #{aiScore}, #{mathScore}, #{creativityScore},
-         #{communicationScore}, #{abilityType}, #{eloScore}, #{kFactor}, #{createTime}, #{updateTime})
+        (#{studentId}, #{studentName}, #{abilityType}, #{eloScore}, #{kFactor}, #{createTime}, #{updateTime})
     </insert>
     <update id="updateStudentAbility" parameterType="com.example.ai_lesson.ability.Domain.StudentAbility">
         UPDATE student_ability
