@@ -8,9 +8,6 @@ public class ResourceEntity {
     private String res_description;
     private String res_type;
 
-    public ResourceEntity() {
-    }
-
     public ResourceEntity(int resource_id, String resource_name, String resource_url, String res_description, String res_type) {
         this.resource_id = resource_id;
         this.resource_name = resource_name;

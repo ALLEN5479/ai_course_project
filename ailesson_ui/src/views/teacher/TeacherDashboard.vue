@@ -145,16 +145,23 @@
           </el-col>
         </div>
 
-        <!-- 作业批改 -->
+        <!-- 待完成工作 -->
         <div class="tasks-section">
-          <h2>作业批改</h2>
+          <h2>待完成工作</h2>
           <el-table :data="pendingTasks" style="width: 100%">
-            <el-table-column prop="missionName" label="任务名称" />
-            <el-table-column prop="status" label="任务状态" />
-            <el-table-column prop="deadline" label="截止日期" sortable :sort-method="sortByDeadline" />
+            <el-table-column prop="courseName" label="课程名称" />
+            <el-table-column prop="taskType" label="任务类型" />
+            <el-table-column prop="deadline" label="截止时间" />
+            <el-table-column prop="priority" label="优先级">
+              <template #default="scope">
+                <el-tag :type="getPriorityType(scope.row.priority)">
+                  {{ scope.row.priority }}
+                </el-tag>
+              </template>
+            </el-table-column>
             <el-table-column label="操作">
               <template #default="scope">
-                <el-button size="small" @click="handleTask(scope.row)">去批改</el-button>
+                <el-button size="small" @click="handleTask(scope.row)">处理</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -169,7 +176,6 @@ import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import axios from 'axios'
-import { publishedMissionApi, taskTemplateApi } from '@/api/taskApi'
 
 // 定义课程接口类型
 interface Course {
@@ -285,52 +291,30 @@ const fetchStudentCount = async () => {
   }
 }
 
-// 待批改任务
-const pendingTasks = ref<any[]>([])
-
-const fetchPendingTasks = async () => {
-  try {
-    const res = await publishedMissionApi.getPublishedMissions()
-    if (res && Array.isArray(res.data)) {
-      // 并发获取任务名称和类型
-      const tasks = await Promise.all(res.data.map(async (item: any) => {
-        let missionName = ''
-        let missionType = ''
-        try {
-          const detail = await taskTemplateApi.getTaskTemplateDetail(item.missionId)
-          missionName = detail?.data?.missionName || ''
-          missionType = detail?.data?.missionType || ''
-        } catch {}
-        // 计算截止日期
-        let deadline = ''
-        let status = ''
-        if (item.endTime) {
-          const end = new Date(item.endTime)
-          end.setDate(end.getDate() + 14)
-          deadline = end.toISOString().slice(0, 10)
-          // 判断任务状态
-          const now = new Date()
-          if (new Date(item.endTime) > now) {
-            status = '进行中'
-          } else {
-            status = '已结束提交'
-          }
-        }
-        return {
-          id: item.id,
-          missionName,
-          status,
-          deadline,
-          missionType
-        }
-      }))
-      // 只保留类型为report的任务
-      pendingTasks.value = tasks.filter(t => t.missionType === 'report')
-    }
-  } catch (e) {
-    // 可选：ElMessage.error('获取作业批改任务失败')
+// 待处理任务
+const pendingTasks = ref([
+  {
+    id: 1,
+    courseName: '数据结构与算法',
+    taskType: '批改作业',
+    deadline: '2024-01-15',
+    priority: '高'
+  },
+  {
+    id: 2,
+    courseName: '计算机网络',
+    taskType: '上传资源',
+    deadline: '2024-01-16',
+    priority: '中'
+  },
+  {
+    id: 3,
+    courseName: '操作系统',
+    taskType: '布置任务',
+    deadline: '2024-01-17',
+    priority: '低'
   }
-}
+])
 
 const goToCourses = () => {
   router.push({
@@ -353,11 +337,16 @@ const manageCourse = (course: Course) => {
 }
 
 const handleTask = (task: any) => {
-  // 跳转到批改页面，传递任务id
-  router.push({
-    path: '/teacher/task-grading',
-    query: { publishedMissionId: task.id }
-  })
+  if (task.taskType === '批改作业') {
+    // 跳转到课程提交列表页面，传递任务ID
+    router.push({
+      path: '/teacher/course-submission-list',
+      query: { taskId: task.id }
+    });
+  } else {
+    ElMessage.info(`处理任务: ${task.taskType}`);
+    // 这里可以跳转到具体的任务处理页面
+  }
 }
 
 const getPriorityType = (priority: string) => {
@@ -407,19 +396,11 @@ const goToClassTaskManager = () => {
   router.push('/teacher/class-task-manager')
 }
 
-// 截止日期排序方法
-const sortByDeadline = (a: any, b: any) => {
-  if (!a.deadline) return 1;
-  if (!b.deadline) return -1;
-  return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
-}
-
 // 组件挂载时获取教师信息和课程数据
 onMounted(() => {
   getTeacherInfo()
   fetchTeacherCourses()
   fetchStudentCount()
-  fetchPendingTasks()
 })
 </script>
 

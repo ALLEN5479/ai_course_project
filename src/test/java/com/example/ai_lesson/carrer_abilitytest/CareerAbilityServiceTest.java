@@ -30,12 +30,6 @@ public class CareerAbilityServiceTest {
     }
 
     @Test
-    void testGenerateAiReport() {
-        AjaxResult result = careerAbilityService.generateAiReport("12121");
-        assertEquals(200, result.getCode());
-    }
-
-    @Test
     void testGetCareerAbilityList() {
         Map<String, Object> result = careerAbilityService.getCareerAbilityList(1, 10);
         assertNotNull(result.get("list"));

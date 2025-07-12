@@ -172,7 +172,7 @@
       <div class="resource-form">
         <el-form :inline="true" :model="resourceForm">
           <el-form-item label="选择知识节点">
-            <el-select v-model="resourceForm.selectedNode" placeholder="请选择知识节点" style="width: 200px;" @change="handleNodeChange">
+            <el-select v-model="resourceForm.selectedNode" placeholder="请选择知识节点" style="width: 200px;">
               <el-option
                 v-for="node in allNodes"
                 :key="node.value"
@@ -192,6 +192,18 @@
       <!-- 资源上传对话框 -->
       <el-dialog v-model="uploadDialogVisible" title="上传学习资源" width="500px">
         <el-form :model="uploadForm" label-width="100px">
+          <el-form-item label="资源名称">
+            <el-input v-model="uploadForm.name" placeholder="请输入资源名称" />
+          </el-form-item>
+          <el-form-item label="资源类型">
+            <el-select v-model="uploadForm.type" placeholder="请选择资源类型" style="width: 100%;">
+              <el-option label="文档" value="document" />
+              <el-option label="视频" value="video" />
+              <el-option label="图片" value="image" />
+              <el-option label="链接" value="link" />
+              <el-option label="其他" value="other" />
+            </el-select>
+          </el-form-item>
           <el-form-item label="资源描述">
             <el-input
               v-model="uploadForm.description"
@@ -205,17 +217,19 @@
               class="resource-upload"
               :auto-upload="false"
               :on-change="handleResourceFileChange"
-              :on-remove="handleResourceFileRemove"
               :file-list="resourceFileList"
-              accept=".pdf,.mp4,.avi,.mov,.wmv,.flv,.mkv"
+              accept=".pdf,.doc,.docx,.txt,.mp4,.avi,.jpg,.png,.gif"
             >
               <el-button type="primary">选择文件</el-button>
               <template #tip>
                 <div class="el-upload__tip">
-                  支持PDF文档和视频文件（mp4、avi、mov、wmv、flv、mkv），暂不支持其他格式
+                  支持文档、视频、图片等格式，单个文件不超过50MB
                 </div>
               </template>
             </el-upload>
+          </el-form-item>
+          <el-form-item label="资源链接" v-if="uploadForm.type === 'link'">
+            <el-input v-model="uploadForm.url" placeholder="请输入资源链接" />
           </el-form-item>
         </el-form>
         <template #footer>
@@ -251,10 +265,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue';
+import { ref, reactive, computed } from 'vue';
 import { UploadFilled } from '@element-plus/icons-vue';
 import { ElMessage } from 'element-plus';
-import axios from 'axios';
 
 const props = defineProps<{ courseId: number | string }>();
 
@@ -338,34 +351,32 @@ const resourceForm = reactive({
 
 const uploadDialogVisible = ref(false);
 const uploadForm = reactive({
-  description: ''
+  name: '',
+  type: '',
+  description: '',
+  url: ''
 });
 
 const resourceFileList = ref<any[]>([]);
 
 // 所有知识节点
-const allNodes = ref<any[]>([]);
-
-// 获取知识点数据
-const fetchKnowledgeNodes = async () => {
-  try {
-    const response = await axios.get('http://localhost:8080/api/nodes/all');
-    if (response.data.success && Array.isArray(response.data.data)) {
-      allNodes.value = response.data.data.map((node: any) => ({
-        label: node.name,
-        value: node.id
-      }));
-    }
-  } catch (error) {
-    console.error('获取知识点失败:', error);
-    ElMessage.error('获取知识点失败');
-  }
-};
-
-// 页面加载时获取知识点
-onMounted(() => {
-  fetchKnowledgeNodes();
-});
+const allNodes = [
+  { label: '数据结构', value: 'data-structure' },
+  { label: '线性结构', value: 'linear-structure' },
+  { label: '非线性结构', value: 'nonlinear-structure' },
+  { label: '查找算法', value: 'search-algorithm' },
+  { label: '排序算法', value: 'sort-algorithm' },
+  { label: '数组', value: 'array' },
+  { label: '链表', value: 'linked-list' },
+  { label: '栈', value: 'stack' },
+  { label: '队列', value: 'queue' },
+  { label: '树', value: 'tree' },
+  { label: '图', value: 'graph' },
+  { label: '哈希表', value: 'hash-table' },
+  { label: '二分查找', value: 'binary-search' },
+  { label: '冒泡排序', value: 'bubble-sort' },
+  { label: '快速排序', value: 'quick-sort' }
+];
 
 // 模拟资源数据
 const allResources = ref([
@@ -417,18 +428,9 @@ const filteredResources = computed(() => {
   return allResources.value.filter(resource => resource.nodeId === resourceForm.selectedNode);
 });
 
-// 监听节点选择变化
-const handleNodeChange = (nodeId: string) => {
-  if (nodeId) {
-    fetchNodeResources(nodeId);
-  } else {
-    allResources.value = [];
-  }
-};
-
 // 方法
 function getNodeName(nodeId: string): string {
-  const node = allNodes.value.find((n: any) => n.value === nodeId);
+  const node = allNodes.find(n => n.value === nodeId);
   return node ? node.label : '';
 }
 
@@ -456,81 +458,37 @@ function getResourceTypeColor(type: string): string {
 
 function uploadResource() {
   uploadDialogVisible.value = true;
+  uploadForm.name = '';
+  uploadForm.type = '';
   uploadForm.description = '';
+  uploadForm.url = '';
   resourceFileList.value = [];
 }
 
 function handleResourceFileChange(file: any, fileList: any[]) {
   console.log('资源文件变化:', file, fileList);
-  // 更新文件列表
-  resourceFileList.value = fileList;
 }
 
-function handleResourceFileRemove(file: any, fileList: any[]) {
-  console.log('资源文件移除:', file, fileList);
-  // 更新文件列表
-  resourceFileList.value = fileList;
-}
-
-async function handleUploadResource() {
-  if (resourceFileList.value.length === 0) {
-    ElMessage.warning('请选择要上传的文件');
+function handleUploadResource() {
+  if (!uploadForm.name || !uploadForm.type) {
+    ElMessage.warning('请填写资源名称和类型');
     return;
   }
   
-  try {
-    const file = resourceFileList.value[0].raw;
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('nodeId', resourceForm.selectedNode);
-    formData.append('description', uploadForm.description || '');
-    
-    const response = await axios.post('http://localhost:8080/api/knowledge-resource/upload', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-      withCredentials: true
-    });
-    
-    if (response.data.success) {
-      ElMessage.success('资源上传成功！');
-      uploadDialogVisible.value = false;
-      // 刷新资源列表
-      fetchNodeResources(resourceForm.selectedNode);
-    } else {
-      ElMessage.error(response.data.message || '上传失败');
-    }
-  } catch (error: any) {
-    console.error('上传失败:', error);
-    ElMessage.error('上传失败: ' + (error.response?.data?.message || error.message));
-  }
+  // 模拟上传
+  const newResource = {
+    id: Date.now(),
+    nodeId: resourceForm.selectedNode,
+    name: uploadForm.name,
+    type: uploadForm.type,
+    description: uploadForm.description,
+    uploadTime: new Date().toLocaleString()
+  };
+  
+  allResources.value.push(newResource);
+  uploadDialogVisible.value = false;
+  ElMessage.success('资源上传成功！');
 }
-
-// 获取指定节点的资源列表
-const fetchNodeResources = async (nodeId: string) => {
-  try {
-    const response = await axios.get(`http://localhost:8080/getResourceId?nodeId=${nodeId}`);
-    if (Array.isArray(response.data)) {
-      // 获取资源详情
-      const resourceDetails = [];
-      for (const resourceId of response.data) {
-        const resourceResponse = await axios.get(`http://localhost:8080/getresources?resource_id=${resourceId}`);
-        if (resourceResponse.data && resourceResponse.data.length > 0) {
-          const resource = resourceResponse.data[0];
-          resourceDetails.push({
-            id: resource.resource_id,
-            nodeId: nodeId,
-            name: resource.resource_name,
-            type: resource.res_type,
-            description: resource.res_description,
-            uploadTime: new Date().toLocaleString() // 这里可以添加创建时间字段
-          });
-        }
-      }
-      allResources.value = resourceDetails;
-    }
-  } catch (error) {
-    console.error('获取节点资源失败:', error);
-  }
-};
 
 function viewResource(resource: any) {
   ElMessage.info(`查看资源: ${resource.name}`);

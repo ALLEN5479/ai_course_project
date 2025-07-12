@@ -27,6 +27,7 @@
           <div class="action-title">任务完成区域</div>
           <div class="action-placeholder">（此处可放答题、提交等功能）</div>
           <el-button type="primary" @click="handleSubmit" size="large" round style="margin-top: 24px;">完成任务</el-button>
+          <el-button type="success" @click="goToStudyResources" size="large" round style="margin-top: 16px;">前往学习资源</el-button>
         </el-card>
       </el-col>
     </el-row>
@@ -88,6 +89,10 @@ async function handleSubmit() {
   } catch (e) {
     window.ElMessage && window.ElMessage.error('分数同步失败')
   }
+}
+
+function goToStudyResources() {
+  router.push({ name: 'student-study-resources', query: { nodeId: 1 } })
 }
 
 onMounted(() => {
